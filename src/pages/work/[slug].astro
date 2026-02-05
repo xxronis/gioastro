@@ -1,0 +1,94 @@
+---
+import '../../styles/global.css';
+import type { GetStaticPaths } from 'astro';
+import { api, resolveAlias } from '../../lib/drupal';
+import { getImagesFromWork } from '../../lib/jsonapi-images';
+import Layout from '../../layouts/Layout.astro';
+
+type JsonApiDoc = { data: any; included?: any[] };
+
+// Pre-render the latest N works; older ones render via SSR fallback.
+// At build time, astro builds the list of paths to prerender:
+export const getStaticPaths: GetStaticPaths = async () => {
+  const list = await api<{ data: any[] }>(
+    '/node/work',
+    { 'sort': '-created', 'page[limit]': '30', 'fields[node--work]': 'title,path' }
+  );
+  return list.data
+    .filter((n) => !!n.attributes?.path?.alias)
+    .map((n) => {
+      const slug = n.attributes.path.alias.split('/').filter(Boolean).pop();
+      return { params: { slug }, props: { id: n.id } };
+    });
+};
+
+// Allow SSR for everything not pre-rendered:
+export const prerender = false;
+
+const { slug } = Astro.params;
+console.log(`Rendering work/${slug}...`);
+// Your pretty URL is /work/[slug]; resolve it to the Drupal canonical:
+const alias = `/work/${slug}`;
+const route = await resolveAlias(alias);
+
+if (!route || route?.entity?.type !== 'node' ) { // route.resolved !== 'entity.node.canonical'
+  return Astro.redirect('/404');
+}
+
+// Fetch the node with related image data (works for both direct and media-based images)
+const nodeDoc = await api<JsonApiDoc>(
+  `/node/work/${route.entity.uuid}`,
+  { include: 'field_media,field_media.field_media_image' }
+);
+
+const node = nodeDoc.data;
+const title = node?.attributes?.title ?? 'Work';
+const body = node?.attributes?.body?.processed ?? '';
+const drupalBase = import.meta.env.DRUPAL_BASE_URL || '';   
+const images = getImagesFromWork(nodeDoc, drupalBase);
+
+// TODO to be used in Layout for SEO:
+const canonical = drupalBase + (node?.attributes?.path?.alias ?? alias);
+
+// Optional meta description if you have Metatag; otherwise fallback:
+const description =
+  node?.attributes?.metatag?.description ||
+  (node?.attributes?.body?.summary ?? '');
+
+---
+
+<Layout>
+  <div class="py-8">
+    <div class="container mx-auto w-[80%]">
+      <div class="lg:pl-[8%] grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
+        {/* LEFT: images */}
+        <!-- <div class="space-y-6"> -->
+          {images.map((img) => (
+            <div class="flex items-center justify-center">
+              <img
+                src={img.src}
+                alt={img.alt}
+                width={img.width}
+                height={img.height}
+                loading="lazy"
+                class="max-w-full max-h-full object-contain shadow"
+              />
+            </div>
+          ))}
+        <!-- </div> -->
+
+        {/* RIGHT: details/content */}
+        <div class="space-y-6 lg:border-l lg:pl-10">
+          <div>
+            <div class="text-xs tracking-[0.3em] uppercase text-gray-500">Details</div>
+            <h1 class="mt-2 text-4xl font-semibold">{title}</h1>
+          </div>
+
+          <article class="prose prose-lg max-w-none">
+            <div set:html={body} />
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

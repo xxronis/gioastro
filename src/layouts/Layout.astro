@@ -1,15 +1,28 @@
+---
+import { ClientRouter } from "astro:transitions";
+import Header from "../components/Header.astro";
+---
+
 <!doctype html>
 <html lang="en">
-	<head>
+  <head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+		<title>Giorgos Chronopoulos | Watercolor | Fine arts</title>
+  </head>
+  <body transition:animate="fade">
+	<ClientRouter />
+	<div class="flex flex-col min-h-screen">
+		<Header/>
+        <!-- <div transition:persist>
+            <Header />
+        </div> -->
+		<main class="flex-1">
+			<slot />
+		</main>
+	</div>
+  </body>
 </html>
 
 <style>

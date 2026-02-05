@@ -1,11 +1,31 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Latest from '../components/Latest.drupal.astro';
+import LoopVideo from "../components/LoopVideo.astro";
+import mp4 from "../assets/watercolor-640.mp4";
+import webm from "../assets/watercolor-640.webm";
+import poster from "../assets/watercolor-poster.webp";
 ---
 
 <Layout>
-	<Welcome />
+	<div class="h-[calc(100vh-26rem)] w-full bg-[url('/bg.webp')] bg-cover bg-[73%_100%] relative">
+		<LoopVideo
+			mp4={mp4}
+			webm={webm}
+			poster={poster.src}
+		/>
+	</div>
+
+	<div class="py-8">
+		<div class="container mx-auto w-[80%]">
+		<Latest />
+		<div class="flex justify-end mt-4">
+			<a href="/work" class="flex items-center gap-2">
+			View All Work 
+			<!-- <FontAwesomeIcon icon={faArrowRight} -->
+			</Link>
+		</div>
+		</div>
+	</div>
+	
 </Layout>

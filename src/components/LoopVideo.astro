@@ -1,0 +1,37 @@
+---
+/**
+ * Props:
+ * - mp4: URL/import of the H.264 MP4
+ * - webm: URL/import of the VP9/AV1 WebM (optional but smaller)
+ * - poster: URL/import of a JPEG/WEBP poster frame (optional)
+ * - className: Tailwind classes (optional)
+ */
+export interface Props {
+  mp4: string;
+  webm?: string;
+  poster: string;
+  className?: string;
+}
+const { mp4, webm, poster, className = "" } = Astro.props;
+import "../styles/global.css";
+---
+<div class={`relative w-full h-full overflow-hidden ${className}`}>
+    <video
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster={poster}
+        class={`absolute inset-0 h-full w-full object-cover`}
+    >
+        {webm && <source src={webm} type="video/webm" />}
+        <source src={mp4} type="video/mp4" />
+    </video>
+    <div class="absolute left-0 top-20 text-white lg:px-6 text-4xl bg-black bg-opacity-50 lg:pl-[13%] md:pl-[13%]">
+        <div class="relative p-7">
+            <h1 class="home-lead">Giorgos Chronopoulos</h1>
+            <p class="text-lg home-sub-lead">Contemporary artist based in Athens, Greece</p>
+        </div>
+    </div>
+</div>
