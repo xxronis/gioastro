@@ -6,12 +6,18 @@
     "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro dev",
     "build": "astro build",
     "preview": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "build:cf": "ASTRO_ADAPTER=cloudflare astro build",
+    "dev:cf": "npm run build:cf && wrangler pages dev ./dist"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",
     "@tailwindcss/vite": "^4.1.13",
     "astro": "^5.13.5",
     "tailwindcss": "^4.1.13"
+  },
+  "devDependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
+    "wrangler": "^4.62.0"
   }
 }

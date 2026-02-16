@@ -1,46 +1,75 @@
 ---
 import '../../styles/global.css';
 import Layout from '../../layouts/Layout.astro';
-import { api } from '../../lib/drupal';
-import { getImagesFromEntity } from '../../lib/jsonapi-images';
+import { drupalClient } from '../../lib/drupal';
+import { cfImg, getImagesFromEntity } from '../../lib/jsonapi-images';
+import { requireEnv } from '../../lib/env';
 
-const drupalBase = import.meta.env.DRUPAL_BASE_URL || '';
+// Cloudflare SSR:
+const runtime  = Astro.locals.runtime;
+// Node dev fallback:
+const buildEnv = import.meta.env;
+const env = requireEnv(runtime?.env ?? buildEnv);
+const drupal = drupalClient(env);
 
-const works = await api<{ data: any[]; included?: any[] }>(
+export const prerender = false;
+
+const works = await drupal.api<{ data: any[]; included?: any[] }>(
   '/node/work',
   {
     sort: '-created',
-    // 'page[limit]': '30',
+    'page[limit]': '20',
     include: 'field_media,field_media.field_media_image',
     // keep response smaller; add fields here if you want
     'fields[node--work]': 'title,path,field_media',
+    // _cb: String(Date.now()), // cache buster for development; remove for production
   }
 );
+
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, s-maxage=60, stale-while-revalidate=300'
+);
+
+console.log(`Fetched ${works.data.length} works...`);
 ---
 
 <Layout>
   <div class="container mx-auto w-[80%] py-8">
     <h1 class="text-4xl font-semibold mb-4">Work</h1>
 
-    <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <ul class="columns-1 sm:columns-2 lg:columns-3 [column-gap:1.5rem]">
       {works.data.map((n) => {
-        const images = getImagesFromEntity(n, works.included, drupalBase);
+        const images = getImagesFromEntity(n, works.included, env.DRUPAL_BASE_URL || '');
         const img = images[0];
         const alias = n.attributes?.path?.alias ?? `/node/${n.id}`;
 
+        const w = img?.width;
+        const h = img?.height;
+
         return (
-          <li class="bg-white rounded-xl shadow overflow-hidden">
-            <a class="block h-full" href={alias}>
+          <li class="mb-6 break-inside-avoid">
+            <a class="group block w-full overflow-hidden shadow bg-white relative" href={alias}>
+              
               {img?.src && (
                 <img
-                  class="w-full h-48 object-cover"
-                  src={img.src}
-                  alt={img.alt ?? ''}
+                  src={cfImg(img.src, { width: 600, quality: 85 })}
+                  srcset={`${cfImg(img.src, { width: 600, quality: 85 })} 600w, ${cfImg(img.src, { width: 1200, quality: 85 })} 1200w, ${cfImg(img.src, { width: 1800, quality: 85 })} 1800w`}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   loading="lazy"
+                  decoding="async"
+                  alt={img.alt ?? ""}
+                  width={w}
+                  height={h}
+                  class="block w-full h-auto"
                 />
               )}
-              <div class="p-4">
-                <div class="text-blue-600 hover:underline font-medium">
+
+              {/* Title overlay: hover reveal on desktop, always visible on mobile */}
+              <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-neutral-900/60 px-4 py-3
+                          opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <div class="text-white font-medium leading-snug">
                   {n.attributes?.title}
                 </div>
               </div>

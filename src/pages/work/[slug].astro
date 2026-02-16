@@ -1,26 +1,35 @@
 ---
 import '../../styles/global.css';
 import type { GetStaticPaths } from 'astro';
-import { api, resolveAlias } from '../../lib/drupal';
+import { drupalClient } from '../../lib/drupal';
 import { getImagesFromWork } from '../../lib/jsonapi-images';
 import Layout from '../../layouts/Layout.astro';
+import { requireEnv } from '../../lib/env';
 
 type JsonApiDoc = { data: any; included?: any[] };
 
+// Cloudflare SSR:
+const runtime  = Astro.locals.runtime;
+// Node dev fallback:
+const buildEnv = import.meta.env;
+const env = requireEnv(runtime?.env ?? buildEnv);
+const drupal = drupalClient(env);
+
 // Pre-render the latest N works; older ones render via SSR fallback.
 // At build time, astro builds the list of paths to prerender:
-export const getStaticPaths: GetStaticPaths = async () => {
-  const list = await api<{ data: any[] }>(
-    '/node/work',
-    { 'sort': '-created', 'page[limit]': '30', 'fields[node--work]': 'title,path' }
-  );
-  return list.data
-    .filter((n) => !!n.attributes?.path?.alias)
-    .map((n) => {
-      const slug = n.attributes.path.alias.split('/').filter(Boolean).pop();
-      return { params: { slug }, props: { id: n.id } };
-    });
-};
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   // Cloudflare SSR:
+//   const list = await drupal.api<{ data: any[] }>(
+//     '/node/work',
+//     { 'sort': '-created', 'page[limit]': '30', 'fields[node--work]': 'title,path' }
+//   );
+//   return list.data
+//     .filter((n) => !!n.attributes?.path?.alias)
+//     .map((n) => {
+//       const slug = n.attributes.path.alias.split('/').filter(Boolean).pop();
+//       return { params: { slug }, props: { id: n.id } };
+//     });
+// };
 
 // Allow SSR for everything not pre-rendered:
 export const prerender = false;
@@ -29,14 +38,14 @@ const { slug } = Astro.params;
 console.log(`Rendering work/${slug}...`);
 // Your pretty URL is /work/[slug]; resolve it to the Drupal canonical:
 const alias = `/work/${slug}`;
-const route = await resolveAlias(alias);
-
+const route = await drupal.resolveAlias(alias);
+console.log('Resolved route:', route);
 if (!route || route?.entity?.type !== 'node' ) { // route.resolved !== 'entity.node.canonical'
   return Astro.redirect('/404');
 }
 
 // Fetch the node with related image data (works for both direct and media-based images)
-const nodeDoc = await api<JsonApiDoc>(
+const nodeDoc = await drupal.api<JsonApiDoc>(
   `/node/work/${route.entity.uuid}`,
   { include: 'field_media,field_media.field_media_image' }
 );
@@ -44,7 +53,7 @@ const nodeDoc = await api<JsonApiDoc>(
 const node = nodeDoc.data;
 const title = node?.attributes?.title ?? 'Work';
 const body = node?.attributes?.body?.processed ?? '';
-const drupalBase = import.meta.env.DRUPAL_BASE_URL || '';   
+const drupalBase = env.DRUPAL_BASE_URL || '';   
 const images = getImagesFromWork(nodeDoc, drupalBase);
 
 // TODO to be used in Layout for SEO:
@@ -54,6 +63,11 @@ const canonical = drupalBase + (node?.attributes?.path?.alias ?? alias);
 const description =
   node?.attributes?.metatag?.description ||
   (node?.attributes?.body?.summary ?? '');
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, s-maxage=60, stale-while-revalidate=300'
+);
 
 ---
 

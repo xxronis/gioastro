@@ -60,3 +60,21 @@ export function getImagesFromEntity(
 ) {
   return getImagesFromWork(node, baseUrl, field, included);
 }
+
+const MEDIA = 'https://media.getreal.gr';
+
+export function cfImg(originPathOrUrl: string, opts: { width?: number; quality?: number } = {}) {
+  const originUrl = originPathOrUrl.startsWith('http')
+    ? originPathOrUrl
+    : `${MEDIA}/${originPathOrUrl.replace(/^\//, '')}`;
+
+  const { width = 600, quality = 85 } = opts;
+
+  const parts = [
+    width ? `width=${width}` : null,
+    `quality=${quality}`,
+    'format=auto',
+  ].filter(Boolean).join(',');
+
+  return `${MEDIA}/cdn-cgi/image/${parts}/${originUrl}`;
+}

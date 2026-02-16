@@ -1,0 +1,4 @@
+name = "gioastro"
+compatibility_date = "2026-02-05"
+compatibility_flags = ["nodejs_compat", "disable_nodejs_process_v2"]
+pages_build_output_dir = "dist"

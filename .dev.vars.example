@@ -1,0 +1,4 @@
+DRUPAL_BASE_URL=https://giochron-ddev.<domain>
+DRUPAL_API_BASE=https://giochron-ddev.<domain>/jsonapi
+PUBLIC_SITE_URL=https://127.0.0.1:56663
+# local build:cf via tunnel for exposed url 
