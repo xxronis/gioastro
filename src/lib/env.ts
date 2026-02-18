@@ -1,6 +1,12 @@
 export type Env = {
   DRUPAL_BASE_URL: string;
   DRUPAL_API_BASE: string;
+  PUBLIC_TURNSTILE_SITE_KEY: string;
+  TURNSTILE_SECRET_KEY: string;
+  CONTACT_TO_EMAIL: string;
+  CONTACT_FROM_EMAIL: string;
+  CONTACT_SUBJECT_PREFIX?: string;
+  RESEND_API_KEY: string;
 };
 
 export function requireEnv(obj: any): Env {
@@ -12,5 +18,5 @@ export function requireEnv(obj: any): Env {
       `Missing env. DRUPAL_BASE_URL=${String(DRUPAL_BASE_URL)} DRUPAL_API_BASE=${String(DRUPAL_API_BASE)}`
     );
   }
-  return { DRUPAL_BASE_URL, DRUPAL_API_BASE };
+  return { DRUPAL_BASE_URL, DRUPAL_API_BASE, PUBLIC_TURNSTILE_SITE_KEY: obj?.PUBLIC_TURNSTILE_SITE_KEY ?? '', TURNSTILE_SECRET_KEY: obj?.TURNSTILE_SECRET_KEY ?? '', CONTACT_TO_EMAIL: obj?.CONTACT_TO_EMAIL ?? '', CONTACT_FROM_EMAIL: obj?.CONTACT_FROM_EMAIL ?? '', CONTACT_SUBJECT_PREFIX: obj?.CONTACT_SUBJECT_PREFIX ?? '', RESEND_API_KEY: obj?.RESEND_API_KEY ?? '' };
 }

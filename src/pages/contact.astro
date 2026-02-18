@@ -1,0 +1,185 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { requireEnv } from "../lib/env";
+
+// const runtime = Astro.locals.runtime;
+// const buildEnv = import.meta.env;
+
+// requireEnv(runtime?.env ?? buildEnv);
+
+// const TURNSTILE_SITE_KEY =
+//   (buildEnv as any).PUBLIC_TURNSTILE_SITE_KEY ??
+//   (runtime?.env as any)?.PUBLIC_TURNSTILE_SITE_KEY ??
+//   "";
+
+const sent = Astro.url.searchParams.get("sent") === "1";
+const error = Astro.url.searchParams.get("error");
+---
+
+<Layout>
+  <div class="py-8">
+    <div class="container mx-auto w-[80%]">
+      <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start lg:pl-[8%]">
+        <div class="space-y-6"></div>
+
+        <div class="space-y-6 lg:border-l lg:pl-10">
+          <div>
+            <h1 class="mt-2 text-4xl font-semibold">Contact</h1>
+          </div>
+
+          {sent ? (
+            <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-900">
+              Message sent.
+            </div>
+          ) : null}
+
+          {error ? (
+            <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-900">
+              Failed to send. Please try again.
+              <span class="ml-2 text-sm opacity-70">(code: {error})</span>
+            </div>
+          ) : null}
+
+          <form class="space-y-4">
+            <div class="hidden">
+              <label>
+                Website
+                <input name="website" type="text" tabindex="-1" autocomplete="off" />
+              </label>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-neutral-800" for="name">Name</label>
+              <input
+                id="name"
+                name="name"
+                required
+                minlength="2"
+                maxlength="100"
+                class="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
+                disabled
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-neutral-800" for="email">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                maxlength="200"
+                class="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
+                disabled
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-neutral-800" for="message">Message</label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                minlength="10"
+                maxlength="4000"
+                rows="6"
+                class="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
+                disabled
+              ></textarea>
+            </div>
+
+            <!-- {TURNSTILE_SITE_KEY ? (
+              <>
+                <div
+                  id="turnstile-container"
+                  class="min-h-[65px]"
+                  data-sitekey={TURNSTILE_SITE_KEY}
+                  data-turnstile-error=""
+                ></div>
+
+                <p id="turnstile-error" class="hidden text-sm text-red-700">
+                  Turnstile failed to render. Check console for the exact error code.
+                </p> -->
+
+                {/* <script type="module" is:inline data-astro-rerun>
+                  {String.raw`
+                    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+                    async function waitForTurnstile(timeoutMs = 8000) {
+                      const start = Date.now();
+                      while (Date.now() - start < timeoutMs) {
+                        if (window.turnstile && typeof window.turnstile.render === 'function') return;
+                        await sleep(50);
+                      }
+                      throw new Error('Turnstile not available (script not loaded/blocked)');
+                    }
+
+                    async function renderTurnstile() {
+                      const el = document.getElementById('turnstile-container');
+                      const errEl = document.getElementById('turnstile-error');
+                      if (!el) return;
+
+                      const sitekey = el.getAttribute('data-sitekey');
+                      if (!sitekey) return;
+
+                      // reset UI
+                      el.setAttribute('data-turnstile-error', '');
+                      if (errEl) errEl.classList.add('hidden');
+
+                      await waitForTurnstile();
+
+                      const doRender = () => {
+                        // Clean re-render (ClientRouter navigations)
+                        const prevId = el.getAttribute('data-widget-id');
+                        if (prevId) {
+                          try { window.turnstile.remove(prevId); } catch {}
+                          el.removeAttribute('data-widget-id');
+                        }
+                        el.innerHTML = '';
+
+                        const id = window.turnstile.render(el, { sitekey });
+                        el.setAttribute('data-widget-id', String(id));
+                      };
+
+                      try {
+                        // If ready() exists, use it (prevents "loaded but not ready" edge cases)
+                        if (typeof window.turnstile.ready === 'function') {
+                          window.turnstile.ready(doRender);
+                        } else {
+                          doRender();
+                        }
+                      } catch (e) {
+                        console.warn('[turnstile] render failed', e);
+                        el.setAttribute('data-turnstile-error', String(e?.message || e));
+                        if (errEl) errEl.classList.remove('hidden');
+                      }
+                    }
+
+                    document.addEventListener('astro:page-load', () => renderTurnstile().catch(console.warn));
+                    document.addEventListener('astro:after-swap', () => renderTurnstile().catch(console.warn));
+                    renderTurnstile().catch(console.warn);
+                  `}
+                </script> */}
+              </>
+            <!-- ) : (
+              <p class="text-sm text-neutral-600">
+                Turnstile is not configured. Set <code class="font-mono">PUBLIC_TURNSTILE_SITE_KEY</code>.
+              </p>
+            )} -->
+
+            <button disabled
+              type="submit"
+              class="inline-flex items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-white hover:bg-neutral-800"
+            >
+              Send
+            </button>
+          </form>
+
+          <p class="text-xs text-neutral-500">
+            This form is protected against spam. Your email is used only to reply.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

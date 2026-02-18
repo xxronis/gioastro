@@ -1,7 +1,35 @@
 @import "tailwindcss";
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.06rem;
 }
-h1, h2, h3, h4, h5, h6 {
-    font-weight: 100;
+h1, h2, h3, h4, h5, h6, a {
+    font-weight: 300;
+}
+a:hover {
+    color:darkgrey;
+}
+a.active {
+    font-weight: 500;
+    text-decoration:overline;
+}
+a.active:hover {
+    color: initial;
+}
+.copyright {
+    font-size: 12px;
+    color: #4B5563;
+}
+
+/* Lock page scroll when the mobile nav overlay is open */
+html:has(#mobile-nav[open]),
+body:has(#mobile-nav[open]) {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Prevent scroll chaining/bounce behind the overlay */
+#mobile-nav[open] > div {
+  overscroll-behavior: contain;
 }

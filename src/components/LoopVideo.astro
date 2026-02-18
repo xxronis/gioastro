@@ -11,8 +11,9 @@ export interface Props {
   webm?: string;
   poster: string;
   className?: string;
+  headlineType?: 'home-lead' | 'not-found';
 }
-const { mp4, webm, poster, className = "" } = Astro.props;
+const { mp4, webm, poster, className = "", headlineType = "home-lead" } = Astro.props;
 import "../styles/global.css";
 ---
 <div class={`relative w-full h-full overflow-hidden ${className}`}>
@@ -28,10 +29,16 @@ import "../styles/global.css";
         {webm && <source src={webm} type="video/webm" />}
         <source src={mp4} type="video/mp4" />
     </video>
-    <div class="absolute left-0 top-20 text-white lg:px-6 text-4xl bg-black bg-opacity-50 lg:pl-[13%] md:pl-[13%]">
-        <div class="relative p-7">
-            <h1 class="home-lead">Giorgos Chronopoulos</h1>
-            <p class="text-lg home-sub-lead">Contemporary artist based in Athens, Greece</p>
+    <div class="absolute left-0 top-20 text-white lg:px-6 bg-black bg-opacity-50 lg:pl-[13%] md:pl-[13%] text-2xl md:text-3xl lg:text-4xl">
+        <div class="relative p-5 lg:p-7 max-w-[300px] md:max-w-[400px] lg:max-w-[500px]">
+                {headlineType === "home-lead" ? (
+                    <>
+                        <h1 class="home-lead">Giorgos Chronopoulos</h1>
+                        <p class="text-lg home-sub-lead">Contemporary artist based in Athens, Greece</p>
+                    </>
+                ) : (
+                    <h1 class="not-found">Page not found!</h1>
+                )}
         </div>
     </div>
 </div>

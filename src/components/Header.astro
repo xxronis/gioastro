@@ -12,39 +12,47 @@ const isActive = (href: string) => {
   if (href === '/') return pathname === '/';
   return pathname === href || pathname.startsWith(href + '/');
 };
+
+const navLinks = pathname === '/' ? links.filter((l) => l.href !== '/') : links;
 ---
 
 <section class="sticky top-0 z-50 bg-[#ffffff]/70 backdrop-blur-md border-b border-white/10">
   <div class="container mx-auto lg:w-[80%]">
     <nav class="flex items-center justify-between flex-wrap p-6 lg:pr-0 lg:pl-0">
       <div class="flex items-center flex-shrink-0 text-black mr-6">
-        <a href="/" class="font-semibold text-xl tracking-tight">
+        <a href="/" class="font-semibold text-xl tracking-wide logo z-[61]">
           giorgos chronopoulos
         </a>
       </div>
 
       <!-- Mobile toggle (no React/JS) -->
-      <details class="group block lg:hidden">
+      <details id="mobile-nav" class="group relative block lg:hidden">
         <summary
-          class="list-none flex items-center px-3 py-2 text-black hover:text-gray-700 hover:cursor-pointer select-none"
+          class="list-none flex items-center justify-end px-3 py-2 text-black hover:text-gray-700 hover:cursor-pointer select-none relative z-[70]"
           aria-label="Toggle menu"
         >
-          <!-- <span class="text-sm font-medium">Menu</span> -->
           <svg class="ml-2 h-5 w-5 fill-current" viewBox="0 0 20 20" aria-hidden="true">
             <path d="M2 4h16v2H2V4zm0 5h16v2H2V9zm0 5h16v2H2v-2z" />
           </svg>
         </summary>
 
-        <div class="w-full block flex-grow mt-4 group-open:block">
-          <div class="text-sm flex flex-col gap-2">
-            {links.map((l) => (
+        <!-- Fullscreen overlay -->
+        <div
+          class="hidden group-open:block fixed left-0 top-0 z-[60]
+                 h-[100dvh] w-[100vw]
+                 bg-white/97 backdrop-blur-md
+                 p-6 pt-24 overflow-y-auto"
+        >
+          <div class="text-sm flex flex-col gap-4 items-end">
+            {navLinks.map((l) => (
               <a
                 href={l.href}
                 class={[
-                  'header-link block',
-                  isActive(l.href) ? 'active text-black' : 'text-black hover:text-black',
+                  'header-link block text-xl',
+                  isActive(l.href) ? 'active text-black' : 'text-black hover:text-red-700',
                 ].join(' ')}
                 aria-current={isActive(l.href) ? 'page' : undefined}
+                onclick="this.closest('details')?.removeAttribute('open')"
               >
                 {l.label}
               </a>
@@ -56,12 +64,12 @@ const isActive = (href: string) => {
       <!-- Desktop menu -->
       <div class="hidden w-full flex-grow lg:flex lg:items-center lg:w-auto">
         <div class="text-sm lg:flex-grow lg:flex lg:justify-end gap-6">
-          {links.map((l) => (
+          {navLinks.map((l) => (
             <a
               href={l.href}
               class={[
                 'header-link',
-                isActive(l.href) ? 'active text-black' : 'text-black hover:text-black',
+                isActive(l.href) ? 'active text-black' : 'text-black hover:text-red-700',
               ].join(' ')}
               aria-current={isActive(l.href) ? 'page' : undefined}
             >

@@ -8,31 +8,26 @@ import Footer from "../components/Footer.astro";
 <!doctype html>
 <html lang="en">
   <head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>Giorgos Chronopoulos | Watercolor | Fine arts</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<title>Giorgos Chronopoulos | Watercolor | Fine arts</title>
+
+    <!-- Load once globally (avoids duplicate-load warnings with ClientRouter/prefetch) -->
+    <!-- <script
+      id="cf-turnstile-script"
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+      defer
+    ></script> -->
   </head>
   <body transition:animate="fade">
-	<ClientRouter />
-	<div class="flex flex-col min-h-screen">
-		<Header/>
-        <!-- <div transition:persist>
-            <Header />
-        </div> -->
-		<main class="flex-1">
-			<slot />
-		</main>
-		<Footer />
-	</div>
+    <ClientRouter />
+    <div class="flex flex-col min-h-screen">
+        <Header/>
+        <main class="flex-1">
+            <slot />
+        </main>
+        <Footer />
+    </div>
   </body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

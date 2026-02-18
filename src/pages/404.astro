@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoopVideo from "../components/LoopVideo.astro";
+import mp4 from "../assets/watercolor-640.mp4";
+import webm from "../assets/watercolor-640.webm";
+import poster from "../assets/watercolor-poster.webp";
+---
+
+<Layout>
+	<div class="h-[calc(100vh-230px)] md:h-[calc(100vh-10rem)] w-full bg-[url('/bg.webp')] bg-cover bg-[73%_100%] relative">
+		<LoopVideo
+			mp4={mp4}
+			webm={webm}
+			poster={poster.src}
+            headlineType='not-found'
+		/>
+	</div>
+</Layout>
