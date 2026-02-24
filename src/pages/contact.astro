@@ -1,16 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { requireEnv } from "../lib/env";
-
-// const runtime = Astro.locals.runtime;
-// const buildEnv = import.meta.env;
-
-// requireEnv(runtime?.env ?? buildEnv);
-
-// const TURNSTILE_SITE_KEY =
-//   (buildEnv as any).PUBLIC_TURNSTILE_SITE_KEY ??
-//   (runtime?.env as any)?.PUBLIC_TURNSTILE_SITE_KEY ??
-//   "";
 
 const sent = Astro.url.searchParams.get("sent") === "1";
 const error = Astro.url.searchParams.get("error");

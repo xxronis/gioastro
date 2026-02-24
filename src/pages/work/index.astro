@@ -1,16 +1,7 @@
 ---
-import '../../styles/global.css';
 import Layout from '../../layouts/Layout.astro';
-import { drupalClient } from '../../lib/drupal';
+import { drupal } from '../../lib/drupal';
 import { cfImg, getImagesFromEntity } from '../../lib/jsonapi-images';
-import { requireEnv } from '../../lib/env';
-
-// Cloudflare SSR:
-const runtime  = Astro.locals.runtime;
-// Node dev fallback:
-const buildEnv = import.meta.env;
-const env = requireEnv(runtime?.env ?? buildEnv);
-const drupal = drupalClient(env);
 
 export const prerender = false;
 
@@ -20,19 +11,14 @@ const works = await drupal.api<{ data: any[]; included?: any[] }>(
     sort: '-created',
     'page[limit]': '20',
     include: 'field_media,field_media.field_media_image',
-    // keep response smaller; add fields here if you want
     'fields[node--work]': 'title,path,field_media',
-    // _cb: String(Date.now()), // cache buster for development; remove for production
   }
 );
-
 
 Astro.response.headers.set(
   'Cache-Control',
   'public, s-maxage=60, stale-while-revalidate=300'
 );
-
-console.log(`Fetched ${works.data.length} works...`);
 ---
 
 <Layout>
@@ -41,7 +27,7 @@ console.log(`Fetched ${works.data.length} works...`);
 
     <ul class="columns-1 sm:columns-2 lg:columns-3 [column-gap:1.5rem]">
       {works.data.map((n) => {
-        const images = getImagesFromEntity(n, works.included, env.DRUPAL_BASE_URL || '');
+        const images = getImagesFromEntity(n, works.included, drupal.baseUrl);
         const img = images[0];
         const alias = n.attributes?.path?.alias ?? `/node/${n.id}`;
 

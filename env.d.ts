@@ -1,7 +1,1 @@
-declare namespace App {
-	interface Locals {
-		runtime: {
-            env: Record<string, string>;
-        };
-	}
-}
+/// <reference path=".astro/types.d.ts" />

@@ -6,7 +6,7 @@ Keep edits concise and reference the files below when you need to understand pat
 Key things to know
 - Framework: Astro (v5), server output via `@astrojs/node` adapter (see `astro.config.mjs`). Build output is a server bundle (output: 'server').
 - Dev/build commands: use `npm run dev`, `npm run build`, and `npm run preview` (see `package.json`).
-- Styling: Tailwind is wired through a Vite plugin (`@tailwindcss/vite`) in `astro.config.mjs`. Global CSS lives at `src/styles/global.css` and is imported in components.
+- Styling: Tailwind is wired through a Vite plugin (`@tailwindcss/vite`) in `astro.config.mjs`. Global CSS lives at `src/styles/global.css` and is imported from `Layout.astro`.
 
 Data & integration patterns (Drupal JSON:API)
 - Data helpers: `src/lib/drupal.ts` exposes two helpers:

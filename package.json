@@ -4,16 +4,18 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro dev",
-    "build": "astro build",
+    "build": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro build",
     "preview": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro preview",
     "astro": "astro",
     "build:cf": "ASTRO_ADAPTER=cloudflare astro build",
-    "dev:cf": "npm run build:cf && wrangler pages dev ./dist"
+    "dev:cf": "npm run build:cf && wrangler pages dev ./dist",
+    "deploy:prod": "npm run build:cf && npx wrangler pages deploy",
+    "tail:prod": "npx wrangler pages deployment tail --project-name gioastro --production"
   },
   "dependencies": {
-    "@astrojs/node": "^9.4.3",
+    "@astrojs/node": "^9.5.4",
     "@tailwindcss/vite": "^4.1.13",
-    "astro": "^5.13.5",
+    "astro": "^5.17.3",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {

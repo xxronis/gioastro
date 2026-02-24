@@ -14,7 +14,6 @@ export interface Props {
   headlineType?: 'home-lead' | 'not-found';
 }
 const { webm, poster, className = "", headlineType = "home-lead" } = Astro.props;
-import "../styles/global.css";
 ---
 <div class={`relative w-full h-full overflow-hidden ${className}`}>
     <!-- <video
