@@ -10,7 +10,7 @@
     "build:cf": "ASTRO_ADAPTER=cloudflare astro build",
     "dev:cf": "npm run build:cf && wrangler pages dev ./dist",
     "deploy:prod": "npm run build:cf && npx wrangler pages deploy",
-    "tail:prod": "npx wrangler pages deployment tail --project-name gioastro --production"
+    "tail:prod": "npx wrangler pages deployment tail --project-name gioastro"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.4",
@@ -20,6 +20,6 @@
   },
   "devDependencies": {
     "@astrojs/cloudflare": "^12.6.12",
-    "wrangler": "^4.62.0"
+    "wrangler": "^4.68.1"
   }
 }
