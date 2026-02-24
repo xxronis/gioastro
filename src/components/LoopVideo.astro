@@ -7,33 +7,34 @@
  * - className: Tailwind classes (optional)
  */
 export interface Props {
-  mp4: string;
+  mp4?: string;
   webm?: string;
-  poster: string;
+  poster?: string;
   className?: string;
   headlineType?: 'home-lead' | 'not-found';
 }
-const { mp4, webm, poster, className = "", headlineType = "home-lead" } = Astro.props;
+const { webm, poster, className = "", headlineType = "home-lead" } = Astro.props;
 import "../styles/global.css";
 ---
 <div class={`relative w-full h-full overflow-hidden ${className}`}>
-    <video
+    <!-- <video
         autoplay
         muted
         loop
         playsinline
         preload="metadata"
-        poster={poster}
+        poster={poster}background-color: #191f2457;
+    top: 36%;
         class={`absolute inset-0 h-full w-full object-cover`}
     >
         {webm && <source src={webm} type="video/webm" />}
-        <source src={mp4} type="video/mp4" />
-    </video>
-    <div class="absolute left-0 top-20 text-white lg:px-6 bg-black bg-opacity-50 lg:pl-[13%] md:pl-[13%] text-2xl md:text-3xl lg:text-4xl">
+        {Astro.props?.mp4 && <source src={Astro.props.mp4} type="video/mp4" />}
+    </video> -->
+    <div class="absolute left-0 top-[36%] text-white lg:px-6 bg-[#191f2457] bg-opacity-10 lg:pl-[13%] md:pl-[13%] text-2xl md:text-3xl lg:text-4xl">
         <div class="relative p-5 lg:p-7 max-w-[300px] md:max-w-[400px] lg:max-w-[500px]">
                 {headlineType === "home-lead" ? (
                     <>
-                        <h1 class="home-lead">Giorgos Chronopoulos</h1>
+                        {/* <h1 class="home-lead">Giorgos Chronopoulos</h1> */}
                         <p class="text-lg home-sub-lead">Contemporary artist based in Athens, Greece</p>
                     </>
                 ) : (

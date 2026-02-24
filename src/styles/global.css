@@ -12,7 +12,11 @@ a:hover {
 }
 a.active {
     font-weight: 500;
-    text-decoration:overline;
+}
+@media (min-width: 1024px) {
+  a.active {
+    text-decoration: overline;
+  }
 }
 a.active:hover {
     color: initial;
@@ -32,4 +36,62 @@ body:has(#mobile-nav[open]) {
 /* Prevent scroll chaining/bounce behind the overlay */
 #mobile-nav[open] > div {
   overscroll-behavior: contain;
+}
+
+/* Show the mobile overlay whenever the <details> is open */
+#mobile-nav[open] .mobile-nav-overlay {
+  display: block;
+}
+
+/* When the mobile menu is open, remove backdrop-filter from the header.
+   This prevents iOS/Safari from breaking/clipping fixed-position overlays. */
+section:has(#mobile-nav[open]) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Show overlay when open */
+#mobile-nav[open] .mobile-nav-overlay {
+  display: block;
+}
+
+/* Swap hamburger -> X */
+.mobile-nav-icon-close {
+  display: none;
+}
+#mobile-nav[open] .mobile-nav-icon-hamburger {
+  display: none;
+}
+#mobile-nav[open] .mobile-nav-icon-close {
+  display: block;
+}
+
+/* Keep the toggle visible as a fixed close button (top-right) while open */
+#mobile-nav[open] > summary.mobile-nav-toggle {
+  position: fixed;
+  top: 1.5rem;   /* matches your p-6 spacing */
+  right: 1.5rem;
+  z-index: 2000;
+  /* background: rgba(255, 255, 255, 0.92); */
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 9999px;
+}
+
+/* Safari/WebKit: fixed overlay + backdrop-filter can glitch; disable header blur when open */
+section:has(#mobile-nav[open]) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Optional (if you already added it, keep): lock background scroll when menu open */
+html:has(#mobile-nav[open]),
+body:has(#mobile-nav[open]) {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* CSS-only lightbox */
+.lightbox:target {
+  display: flex;
 }

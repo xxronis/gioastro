@@ -1,46 +1,70 @@
 ---
 const { pathname } = Astro.url;
+const isHome = pathname === "/";
 
 const links = [
-  { href: '/', label: 'Home' },
-  { href: '/work', label: 'Work' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: "/", label: "Home" },
+  { href: "/work", label: "Work" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const isActive = (href: string) => {
-  if (href === '/') return pathname === '/';
-  return pathname === href || pathname.startsWith(href + '/');
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(href + "/");
 };
 
-const navLinks = pathname === '/' ? links.filter((l) => l.href !== '/') : links;
+const navLinks = isHome ? links.filter((l) => l.href !== "/") : links;
 ---
 
-<section class="sticky top-0 z-50 bg-[#ffffff]/70 backdrop-blur-md border-b border-white/10">
-  <div class="container mx-auto lg:w-[80%]">
-    <nav class="flex items-center justify-between flex-wrap p-6 lg:pr-0 lg:pl-0">
-      <div class="flex items-center flex-shrink-0 text-black mr-6">
-        <a href="/" class="font-semibold text-xl tracking-wide logo z-[61]">
+<section
+  class={[
+    // keep it above ALL page content
+    "sticky top-0 w-full isolate z-[1000]",
+    // homepage: sticky on mobile, but zero-height so it doesn't push content down
+    isHome
+      ? "h-0 bg-transparent border-0 backdrop-blur-0 md:h-auto md:bg-[#ffffff]/70 md:backdrop-blur-md md:border-b md:border-white/10"
+      : "bg-[#ffffff]/70 backdrop-blur-md border-b border-white/10",
+  ].join(" ")}
+>
+  <div class="container relative mx-auto lg:w-[80%]">
+    <nav
+      class={[
+        "flex items-center justify-between flex-wrap p-6 lg:pr-0 lg:pl-0",
+        // homepage mobile: take nav out of flow so the sticky header doesn't reserve space
+        isHome ? "absolute left-0 top-0 w-full md:static" : "",
+      ].join(" ")}
+    >
+      <div class={["flex items-center flex-shrink-0 text-black mr-6", isHome ? " md:flex" : ""].join(" ")}>
+        <a href="/" class="font-semibold text-xl tracking-wide logo relative z-[1200]">
           giorgos chronopoulos
         </a>
       </div>
 
-      <!-- Mobile toggle (no React/JS) -->
-      <details id="mobile-nav" class="group relative block lg:hidden">
+      <!-- Mobile toggle -->
+      <details id="mobile-nav" class="relative block lg:hidden ml-auto">
         <summary
-          class="list-none flex items-center justify-end px-3 py-2 text-black hover:text-gray-700 hover:cursor-pointer select-none relative z-[70]"
+          class="mobile-nav-toggle list-none flex items-center justify-end px-3 py-2 text-black hover:text-gray-700 hover:cursor-pointer select-none relative z-[1300]"
           aria-label="Toggle menu"
         >
-          <svg class="ml-2 h-5 w-5 fill-current" viewBox="0 0 20 20" aria-hidden="true">
+          <span class="sr-only">Toggle menu</span>
+
+          <!-- Hamburger (default) -->
+          <svg class="mobile-nav-icon-hamburger h-6 w-6 fill-current" viewBox="0 0 20 20" aria-hidden="true">
             <path d="M2 4h16v2H2V4zm0 5h16v2H2V9zm0 5h16v2H2v-2z" />
+          </svg>
+
+          <!-- Close (shown when open) -->
+          <svg class="mobile-nav-icon-close h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
           </svg>
         </summary>
 
         <!-- Fullscreen overlay -->
         <div
-          class="hidden group-open:block fixed left-0 top-0 z-[60]
+          class="mobile-nav-overlay hidden fixed left-0 top-0 z-[1200]
                  h-[100dvh] w-[100vw]
-                 bg-white/97 backdrop-blur-md
+                 bg-white/92 backdrop-blur-md
                  p-6 pt-24 overflow-y-auto"
         >
           <div class="text-sm flex flex-col gap-4 items-end">
@@ -48,10 +72,10 @@ const navLinks = pathname === '/' ? links.filter((l) => l.href !== '/') : links;
               <a
                 href={l.href}
                 class={[
-                  'header-link block text-xl',
-                  isActive(l.href) ? 'active text-black' : 'text-black hover:text-red-700',
-                ].join(' ')}
-                aria-current={isActive(l.href) ? 'page' : undefined}
+                  "header-link block text-xl",
+                  isActive(l.href) ? "active text-black" : "text-black hover:text-red-700",
+                ].join(" ")}
+                aria-current={isActive(l.href) ? "page" : undefined}
                 onclick="this.closest('details')?.removeAttribute('open')"
               >
                 {l.label}
@@ -68,10 +92,10 @@ const navLinks = pathname === '/' ? links.filter((l) => l.href !== '/') : links;
             <a
               href={l.href}
               class={[
-                'header-link',
-                isActive(l.href) ? 'active text-black' : 'text-black hover:text-red-700',
-              ].join(' ')}
-              aria-current={isActive(l.href) ? 'page' : undefined}
+                "header-link",
+                isActive(l.href) ? "active text-black" : "text-black hover:text-red-700",
+              ].join(" ")}
+              aria-current={isActive(l.href) ? "page" : undefined}
             >
               {l.label}
             </a>

@@ -2,7 +2,7 @@
 import '../../styles/global.css';
 import type { GetStaticPaths } from 'astro';
 import { drupalClient } from '../../lib/drupal';
-import { getImagesFromWork } from '../../lib/jsonapi-images';
+import { cfImg, getImagesFromWork } from '../../lib/jsonapi-images';
 import Layout from '../../layouts/Layout.astro';
 import { requireEnv } from '../../lib/env';
 
@@ -77,18 +77,62 @@ Astro.response.headers.set(
       <div class="lg:pl-[8%] grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
         {/* LEFT: images */}
         <!-- <div class="space-y-6"> -->
-          {images.map((img) => (
-            <div class="flex items-center justify-center">
-              <img
-                src={img.src}
-                alt={img.alt}
-                width={img.width}
-                height={img.height}
-                loading="lazy"
-                class="max-w-full max-h-full object-contain shadow"
-              />
-            </div>
-          ))}
+          {images.map((img, i) => {
+            const id = `img-${i}`;
+            return (
+              <div class="flex items-center justify-center">
+                {/* Thumbnail → opens lightbox */}
+                <a href={`#${id}`} aria-label="View full size" class="group relative block">
+                  <img
+                    src={cfImg(img.src, { width: 800, quality: 85 })}
+                    srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
+                    sizes="(max-width: 800px) 100vw, 800px"
+                    loading="lazy"
+                    decoding="async"
+                    alt={img.alt ?? ""}
+                    class="max-w-full max-h-full object-contain shadow cursor-zoom-in"
+                  />
+                  {/* hover label */}
+                  <span class="pointer-events-none absolute inset-0 flex items-center justify-center
+                               opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                               bg-black/30 text-white text-sm font-medium tracking-wide">
+                    Click to view full size
+                  </span>
+                </a>
+
+                {/* Lightbox overlay */}
+                <div
+                  id={id}
+                  class="lightbox fixed inset-0 z-[2000] hidden items-center justify-center
+                         bg-black/80 backdrop-blur-sm p-4"
+                >
+                  {/* Click outside (the backdrop) to close */}
+                  <a href="#!" class="absolute inset-0" aria-label="Close lightbox" />
+
+                  <div class="relative max-w-[90vw] max-h-[90dvh]">
+                    <img
+                      src={img.src}
+                      alt={img.alt ?? ""}
+                      loading="lazy"
+                      decoding="async"
+                      class="max-w-full max-h-[90dvh] object-contain shadow-2xl"
+                    />
+                    {/* Close button */}
+                    <a
+                      href="#!"
+                      class="absolute -top-4 -right-4 flex h-8 w-8 items-center justify-center
+                             rounded-full bg-white text-black shadow hover:bg-gray-100"
+                      aria-label="Close"
+                    >
+                      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                        <path d="M6 6l12 12M18 6L6 18"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         <!-- </div> -->
 
         {/* RIGHT: details/content */}
@@ -106,3 +150,13 @@ Astro.response.headers.set(
     </div>
   </div>
 </Layout>
+
+<script>
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && location.hash.startsWith('#img-')) {
+      // Setting href to '#' briefly makes :target match nothing → lightbox hides
+      location.hash = '_';
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  });
+</script>

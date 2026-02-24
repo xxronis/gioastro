@@ -2,29 +2,26 @@
 import Layout from '../layouts/Layout.astro';
 import Latest from '../components/Latest.drupal.astro';
 import LoopVideo from "../components/LoopVideo.astro";
-import mp4 from "../assets/watercolor-640.mp4";
-import webm from "../assets/watercolor-640.webm";
-import poster from "../assets/watercolor-poster.webp";
+// import mp4 from "../assets/watercolor-640.mp4";
+// import webm from "../assets/watercolor-640.webm";
+// import poster from "../assets/bg1.webp";
 ---
 
 <Layout>
-	<div class="h-[calc(100vh-10rem)] md:h-[calc(100vh-10rem)] lg:h-[calc(100vh-26rem)] w-full bg-[url('/bg.webp')] bg-cover bg-[73%_100%] relative">
-		<LoopVideo
-			mp4={mp4}
-			webm={webm}
-			poster={poster.src}
-		/>
+	<div class="h-[calc(100vh-10rem)] md:h-[calc(100vh-10rem)] lg:h-[calc(100vh-26rem)] w-full bg-[url('/bg1.webp')] bg-cover lg:bg-[position:0_20%] relative">
+		<LoopVideo />
 	</div>
 
 	<div class="py-8">
 		<div class="container mx-auto w-[80%]">
 		<Latest />
 		<div class="flex justify-end mt-4">
-			<a href="/work" class="flex items-center gap-2">
-			View All Work 
+			<a href="/work" class="flex items-center gap-2 text-sm hover:underline">
+				View All Work
+				<svg viewBox="0 0 20 20" class="h-4 w-4 fill-none stroke-current stroke-2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M4 10h12M12 5l5 5-5 5" />
+				</svg>
 			</a>
-			<!-- <FontAwesomeIcon icon={faArrowRight} -->
-			<!-- </Link> -->
 		</div>
 		</div>
 	</div>

@@ -35,10 +35,10 @@ const articles = await drupal.api<{ data: any[]; included?: any[] }>(
             const img = images[0];
 
             return (
-                <li class="bg-white shadow overflow-hidden">
+                <li class="overflow-hidden">
                     <a class="block h-full" href={alias}>
-                        {/* image frame keeps consistent size; image keeps aspect ratio */}
-                        <div class="bg-gray-100 aspect-[4/3] flex items-center justify-center p-6">
+                        {/* image frame keeps consistent size; image keeps aspect ratio aspect-[4/3] */ } 
+                        <div class="bg-[#928e7f26] flex items-center justify-center p-6 border-2 rounded-sm shadow aspect-[4/3]">
                             {img?.src && (
                                 // <img
                                 //     class="max-w-full max-h-full object-contain"
@@ -47,8 +47,8 @@ const articles = await drupal.api<{ data: any[]; included?: any[] }>(
                                 //     loading="lazy"
                                 // />
                                 <img
-                                    src={cfImg(img.src, { width: 800, quality: 85 })}
-                                    srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
+                                    src={cfImg(img.src, { width: 400, quality: 85 })}
+                                    srcset={`${cfImg(img.src, { width: 400, quality: 85 })} 800w, ${cfImg(img.src, { width: 800, quality: 85 })} 1600w`}
                                     sizes="(max-width: 800px) 100vw, 800px"
                                     loading="lazy"
                                     decoding="async"
