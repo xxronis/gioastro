@@ -3,6 +3,7 @@ import '../../styles/global.css';
 import { getCollection } from 'astro:content';
 import { cfImg } from '../../lib/jsonapi-images';
 import Layout from '../../layouts/Layout.astro';
+import { parseMeta } from '../../lib/metatag';
 import type { CollectionEntry } from 'astro:content';
 export const prerender = true;
 
@@ -18,10 +19,17 @@ export async function getStaticPaths() {
 
 interface Props { entry: CollectionEntry<'work'> }
 const { entry } = Astro.props;
-const { title, body, images, alias } = entry.data;
+const { title, body, images, alias, metatag } = entry.data;
+const meta = parseMeta(metatag);
 ---
 
-<Layout>
+<Layout
+  title={meta.title ?? title}
+  description={meta.description}
+  ogTitle={meta.title ?? title}
+  ogDescription={meta.description}
+  ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, quality: 85 }) : undefined)}
+>
   <div class="py-8">
     <div class="container mx-auto w-[80%]">
       <div class="lg:pl-[8%] grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
@@ -31,9 +39,9 @@ const { title, body, images, alias } = entry.data;
             <div class="flex items-center justify-center">
               <a href={`#${id}`} aria-label="View full size" class="group relative block">
                 <img
-                  src={cfImg(img.src, { width: 800, quality: 85 })}
-                  srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
-                  sizes="(max-width: 800px) 100vw, 800px"
+                  src={cfImg(img.src, { width: 400, quality: 85 })}
+                  srcset={`${cfImg(img.src, { width: 400, quality: 85 })} 800w, ${cfImg(img.src, { width: 800, quality: 85 })} 1200w`}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 100vw, 600px"
                   loading="lazy"
                   decoding="async"
                   alt={img.alt ?? ""}
@@ -50,8 +58,8 @@ const { title, body, images, alias } = entry.data;
                 <a href="#!" class="absolute inset-0" aria-label="Close lightbox" />
                 <div class="relative max-w-[90vw] max-h-[90dvh]">
                   <img src={img.src} alt={img.alt ?? ""} loading="lazy" decoding="async" class="max-w-full max-h-[90dvh] object-contain shadow-2xl" />
-                  <a href="#!" class="absolute -top-4 -right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-black shadow hover:bg-gray-100" aria-label="Close">
-                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                  <a href="#!" class="absolute -top-4 -right-4 flex h-8 w-8 items-center justify-center rounded-full text-white shadow" aria-label="Close">
+                    <svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
                       <path d="M6 6l12 12M18 6L6 18"/>
                     </svg>
                   </a>

@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
+import { parseMeta } from '../lib/metatag';
 import type { CollectionEntry } from 'astro:content';
 export const prerender = true;
 
@@ -10,7 +11,6 @@ export async function getStaticPaths() {
   return pages
     .filter((e) => !!e.data.alias)
     .map((entry) => ({
-      // alias is like /about — strip leading slash for the slug param
       params: { slug: entry.data.alias.replace(/^\//, '') },
       props: { entry },
     }));
@@ -18,10 +18,17 @@ export async function getStaticPaths() {
 
 interface Props { entry: CollectionEntry<'pages'> }
 const { entry } = Astro.props;
-const { title, body, images } = entry.data;
+const { title, body, images, metatag } = entry.data;
+const meta = parseMeta(metatag);
 ---
 
-<Layout>
+<Layout
+  title={meta.title ?? title}
+  description={meta.description}
+  ogTitle={meta.ogTitle}
+  ogDescription={meta.ogDescription}
+  ogImage={meta.ogImage}
+>
   <div class="py-8">
     <div class="container mx-auto w-[80%]">
       <div class="lg:pl-[8%] grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">

@@ -3,6 +3,8 @@ import '../../styles/global.css';
 import { drupal } from '../../lib/drupal';
 import { cfImg, getImagesFromWork } from '../../lib/jsonapi-images';
 import Layout from '../../layouts/Layout.astro';
+import { parseMeta } from '../../lib/metatag';
+import type { DrupalMetaTag } from '../../lib/metatag';
 
 // SSR fallback for work items not prerendered (e.g. published after last build)
 export const prerender = false;
@@ -20,18 +22,25 @@ if (!route || route?.entity?.type !== 'node') {
 
 const nodeDoc = await drupal.api<JsonApiDoc>(
   `/node/work/${route.entity.uuid}`,
-  { include: 'field_media,field_media.field_media_image' }
+  { include: 'field_media,field_media.field_media_image', 'fields[node--work]': 'title,body,field_media,metatag' }
 );
 
 const node = nodeDoc.data;
 const title = node?.attributes?.title ?? 'Work';
 const body = node?.attributes?.body?.processed ?? '';
 const images = getImagesFromWork(nodeDoc, drupal.baseUrl);
+const meta = parseMeta((node?.attributes?.metatag ?? []) as DrupalMetaTag[]);
 
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 ---
 
-<Layout>
+<Layout
+  title={meta.title ?? title}
+  description={meta.description}
+  ogTitle={meta.ogTitle}
+  ogDescription={meta.ogDescription}
+  ogImage={meta.ogImage}
+>
   <div class="py-8">
     <div class="container mx-auto w-[80%]">
       <div class="lg:pl-[8%] grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
@@ -41,9 +50,9 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-re
             <div class="flex items-center justify-center">
               <a href={`#${id}`} aria-label="View full size" class="group relative block">
                 <img
-                  src={cfImg(img.src, { width: 800, quality: 85 })}
-                  srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
-                  sizes="(max-width: 800px) 100vw, 800px"
+                  src={cfImg(img.src, { width: 400, quality: 85 })}
+                  srcset={`${cfImg(img.src, { width: 400, quality: 85 })} 800w, ${cfImg(img.src, { width: 800, quality: 85 })} 1200w`}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 100vw, 600px"
                   loading="lazy"
                   decoding="async"
                   alt={img.alt ?? ""}
@@ -73,7 +82,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-re
 
         <div class="space-y-6 lg:border-l lg:pl-10">
           <div>
-            <div class="text-xs tracking-[0.3em] uppercase text-gray-500">Details</div>
+            <div class="text-xs tracking-[0.3em] uppercase text-gray-500">Detaildfsds</div>
             <h1 class="mt-2 text-4xl font-semibold">{title}</h1>
           </div>
           <article class="prose prose-lg max-w-none">

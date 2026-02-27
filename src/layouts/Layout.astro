@@ -3,22 +3,52 @@ import '../styles/global.css';
 import { ClientRouter } from "astro:transitions";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+}
+
+const SITE_NAME = 'Giorgos Chronopoulos';
+const SITE_TITLE = `${SITE_NAME} | Watercolor | Fine arts`;
+const SITE_DESCRIPTION = 'Original watercolor paintings and fine art by Giorgos Chronopoulos.';
+const DEFAULT_OG_IMAGE = '/yo.webp';
+
+const {
+  title,
+  description = SITE_DESCRIPTION,
+  ogTitle,
+  ogDescription,
+  ogImage = DEFAULT_OG_IMAGE,
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_TITLE;
+const resolvedOgTitle = ogTitle ?? title ?? SITE_TITLE;
+const resolvedOgDesc = ogDescription ?? description;
+const canonicalUrl = Astro.url.href;
+const resolvedOgImage = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.url).href;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width" />
-	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-	<title>Giorgos Chronopoulos | Watercolor | Fine arts</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonicalUrl} />
 
-    <!-- Load once globally (avoids duplicate-load warnings with ClientRouter/prefetch) -->
-    <!-- <script
-      id="cf-turnstile-script"
-      src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-      defer
-    ></script> -->
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={resolvedOgTitle} />
+    {resolvedOgDesc && <meta property="og:description" content={resolvedOgDesc} />}
+    <meta property="og:image" content={resolvedOgImage} />
   </head>
   <body transition:animate="fade">
     <ClientRouter />

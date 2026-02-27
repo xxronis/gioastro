@@ -1,11 +1,33 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
+const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 const sent = Astro.url.searchParams.get("sent") === "1";
 const error = Astro.url.searchParams.get("error");
 ---
 
 <Layout>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer is:inline></script>
+  <script is:inline data-astro-rerun>
+    function renderTurnstile() {
+      var el = document.getElementById('turnstile-container');
+      if (!el || !window.turnstile) return;
+      var sitekey = el.getAttribute('data-sitekey');
+      if (!sitekey) return;
+      el.innerHTML = '';
+      window.turnstile.render(el, { sitekey: sitekey });
+    }
+    // Re-render after View Transitions soft navigation
+    document.addEventListener('astro:page-load', function() {
+      if (window.turnstile) { renderTurnstile(); return; }
+      // If turnstile API hasn't loaded yet, wait for it
+      var iv = setInterval(function() {
+        if (window.turnstile) { clearInterval(iv); renderTurnstile(); }
+      }, 100);
+      setTimeout(function() { clearInterval(iv); }, 8000);
+    });
+  </script>
+
   <div class="py-8">
     <div class="container mx-auto w-[80%]">
       <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start lg:pl-[8%]">
@@ -39,7 +61,7 @@ const error = Astro.url.searchParams.get("error");
             </div>
           ) : null}
 
-          <form class="space-y-4">
+          <form action="/api/contact" method="POST" class="space-y-4">
             <div class="hidden">
               <label>
                 Website
@@ -56,7 +78,6 @@ const error = Astro.url.searchParams.get("error");
                 minlength="2"
                 maxlength="100"
                 class="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
-                disabled
               />
             </div>
 
@@ -69,7 +90,6 @@ const error = Astro.url.searchParams.get("error");
                 required
                 maxlength="200"
                 class="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
-                disabled
               />
             </div>
 
@@ -83,90 +103,18 @@ const error = Astro.url.searchParams.get("error");
                 maxlength="4000"
                 rows="6"
                 class="mt-1 block w-full rounded-md border border-neutral-300 px-3 py-2"
-                disabled
               ></textarea>
             </div>
 
-            <!-- {TURNSTILE_SITE_KEY ? (
-              <>
-                <div
-                  id="turnstile-container"
-                  class="min-h-[65px]"
-                  data-sitekey={TURNSTILE_SITE_KEY}
-                  data-turnstile-error=""
-                ></div>
-
-                <p id="turnstile-error" class="hidden text-sm text-red-700">
-                  Turnstile failed to render. Check console for the exact error code.
-                </p> -->
-
-                {/* <script type="module" is:inline data-astro-rerun>
-                  {String.raw`
-                    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-                    async function waitForTurnstile(timeoutMs = 8000) {
-                      const start = Date.now();
-                      while (Date.now() - start < timeoutMs) {
-                        if (window.turnstile && typeof window.turnstile.render === 'function') return;
-                        await sleep(50);
-                      }
-                      throw new Error('Turnstile not available (script not loaded/blocked)');
-                    }
-
-                    async function renderTurnstile() {
-                      const el = document.getElementById('turnstile-container');
-                      const errEl = document.getElementById('turnstile-error');
-                      if (!el) return;
-
-                      const sitekey = el.getAttribute('data-sitekey');
-                      if (!sitekey) return;
-
-                      // reset UI
-                      el.setAttribute('data-turnstile-error', '');
-                      if (errEl) errEl.classList.add('hidden');
-
-                      await waitForTurnstile();
-
-                      const doRender = () => {
-                        // Clean re-render (ClientRouter navigations)
-                        const prevId = el.getAttribute('data-widget-id');
-                        if (prevId) {
-                          try { window.turnstile.remove(prevId); } catch {}
-                          el.removeAttribute('data-widget-id');
-                        }
-                        el.innerHTML = '';
-
-                        const id = window.turnstile.render(el, { sitekey });
-                        el.setAttribute('data-widget-id', String(id));
-                      };
-
-                      try {
-                        // If ready() exists, use it (prevents "loaded but not ready" edge cases)
-                        if (typeof window.turnstile.ready === 'function') {
-                          window.turnstile.ready(doRender);
-                        } else {
-                          doRender();
-                        }
-                      } catch (e) {
-                        console.warn('[turnstile] render failed', e);
-                        el.setAttribute('data-turnstile-error', String(e?.message || e));
-                        if (errEl) errEl.classList.remove('hidden');
-                      }
-                    }
-
-                    document.addEventListener('astro:page-load', () => renderTurnstile().catch(console.warn));
-                    document.addEventListener('astro:after-swap', () => renderTurnstile().catch(console.warn));
-                    renderTurnstile().catch(console.warn);
-                  `}
-                </script> */}
-              </>
-            <!-- ) : (
+            {TURNSTILE_SITE_KEY ? (
+              <div id="turnstile-container" data-sitekey={TURNSTILE_SITE_KEY}></div>
+            ) : (
               <p class="text-sm text-neutral-600">
                 Turnstile is not configured. Set <code class="font-mono">PUBLIC_TURNSTILE_SITE_KEY</code>.
               </p>
-            )} -->
+            )}
 
-            <button disabled
+            <button
               type="submit"
               class="inline-flex items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-white hover:bg-neutral-800"
             >

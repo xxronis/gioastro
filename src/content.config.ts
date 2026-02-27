@@ -44,6 +44,10 @@ export const workSchema = z.object({
     slug: z.string(),
   })).optional(),
   created: z.string().optional(),
+  metatag: z.array(z.object({
+    tag: z.string(),
+    attributes: z.record(z.string(), z.string()),
+  })).optional().default([]),
 });
 
 export function drupalWorkLoader(options: {
@@ -68,7 +72,7 @@ export function drupalWorkLoader(options: {
         url.searchParams.set('sort', '-created');
         url.searchParams.set('page[limit]', '100');
         url.searchParams.set('include', 'field_category,field_media,field_media.field_media_image');
-        url.searchParams.set('fields[node--work]', 'title,path,body,created,promote,field_category,field_media');
+        url.searchParams.set('fields[node--work]', 'title,path,body,created,promote,field_category,field_media,metatag');
 
         const res = await fetch(url.toString(), { headers: { Accept: 'application/vnd.api+json' } });
         if (!res.ok) throw new Error(`JSON:API ${res.status}: ${url.pathname}`);
@@ -104,7 +108,7 @@ export function drupalWorkLoader(options: {
             body: node.attributes?.body?.processed ?? undefined,
             images,
             categories: categories.length ? categories : undefined,
-            created: node.attributes?.created ?? undefined,
+            metatag: node.attributes?.metatag ?? [],
           },
         });
 
@@ -130,6 +134,10 @@ export const pagesSchema = z.object({
     width: z.number().optional(),
     height: z.number().optional(),
   })).optional(),
+  metatag: z.array(z.object({
+    tag: z.string(),
+    attributes: z.record(z.string(), z.string()),
+  })).optional().default([]),
 });
 
 export function drupalPagesLoader(options: {
@@ -153,7 +161,7 @@ export function drupalPagesLoader(options: {
         const url = new URL('node/page', apiBase);
         url.searchParams.set('page[limit]', '50');
         url.searchParams.set('include', 'field_media,field_media.field_media_image');
-        url.searchParams.set('fields[node--page]', 'title,path,body,field_media');
+        url.searchParams.set('fields[node--page]', 'title,path,body,field_media,metatag');
 
         const res = await fetch(url.toString(), { headers: { Accept: 'application/vnd.api+json' } });
         if (!res.ok) throw new Error(`JSON:API ${res.status}: ${url.pathname}`);
@@ -175,6 +183,7 @@ export function drupalPagesLoader(options: {
             body: node.attributes?.body?.processed ?? undefined,
             summary: node.attributes?.body?.summary ?? undefined,
             images: images.length ? images : undefined,
+            metatag: node.attributes?.metatag ?? [],
           },
         });
 
