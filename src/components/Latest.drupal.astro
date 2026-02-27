@@ -1,50 +1,37 @@
 ---
-import { drupal } from "../lib/drupal";
-import { cfImg, getImagesFromEntity } from "../lib/jsonapi-images";
-export const prerender = false;
+interface WorkItem {
+  alias: string;
+  img?: { src: string; srcset: string; alt: string };
+}
 
-const articles = await drupal.api<{ data: any[]; included?: any[] }>(
-    "/node/work",
-    {
-        sort: "-created",
-        "page[limit]": "3",
-        include: "field_media,field_media.field_media_image",
-    },
-);
+interface Props {
+  items: WorkItem[];
+}
+
+const { items } = Astro.props;
 ---
 
 <h2 class="text-2xl font-bold mb-4">Featured Artwork</h2>
 <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {
-        articles.data.map((n) => {
-            const images = getImagesFromEntity(
-                n,
-                articles.included,
-                drupal.baseUrl,
-            );
-            const alias = n.attributes?.path?.alias ?? `/node/${n.id}`;
-            const img = images[0];
-
-            return (
-                <li class="overflow-hidden">
-                    <a class="block h-full" href={alias}>
-                        {/* image frame keeps consistent size; image keeps aspect ratio aspect-[4/3] */ } 
-                        <div class="bg-[#928e7f26] flex items-center justify-center p-6 border-2 rounded-sm shadow aspect-[4/3]">
-                            {img?.src && (
-                                <img
-                                    src={cfImg(img.src, { width: 400, quality: 85 })}
-                                    srcset={`${cfImg(img.src, { width: 400, quality: 85 })} 800w, ${cfImg(img.src, { width: 800, quality: 85 })} 1600w`}
-                                    sizes="(max-width: 800px) 100vw, 800px"
-                                    loading="lazy"
-                                    decoding="async"
-                                    alt={img.alt ?? ""}
-                                    class="max-w-full max-h-full object-contain"
-                                />
-                            )}
-                        </div>
-                    </a>
-                </li>
-            );
-        })
+        items.map((item) => (
+            <li class="overflow-hidden">
+                <a class="block h-full" href={item.alias}>
+                    <div class="bg-[#928e7f26] flex items-center justify-center p-6 border-2 rounded-sm shadow aspect-[4/3]">
+                        {item.img && (
+                            <img
+                                src={item.img.src}
+                                srcset={item.img.srcset}
+                                sizes="(max-width: 800px) 100vw, 800px"
+                                loading="lazy"
+                                decoding="async"
+                                alt={item.img.alt}
+                                class="max-w-full max-h-full object-contain"
+                            />
+                        )}
+                    </div>
+                </a>
+            </li>
+        ))
     }
 </ul>

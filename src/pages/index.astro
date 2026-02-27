@@ -1,10 +1,27 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Latest from '../components/Latest.drupal.astro';
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import Latest from "../components/Latest.drupal.astro";
 import LoopVideo from "../components/LoopVideo.astro";
-// import mp4 from "../assets/watercolor-640.mp4";
-// import webm from "../assets/watercolor-640.webm";
-// import poster from "../assets/bg1.webp";
+import { cfImg } from "../lib/jsonapi-images";
+export const prerender = true;
+
+const allWorks = await getCollection("work");
+// Prefer promoted items; fall back to any 3 most recent if fewer than 3 are promoted
+const promoted = allWorks.filter((e) => e.data.promoted);
+const source = promoted.length >= 3 ? promoted : allWorks;
+const featured = source.slice(0, 3);
+
+const latestItems = featured.map((e) => ({
+	alias: e.data.alias,
+	img: e.data.images[0]
+		? {
+				src: cfImg(e.data.images[0].src, { width: 400, quality: 85 }),
+				srcset: `${cfImg(e.data.images[0].src, { width: 400, quality: 85 })} 800w, ${cfImg(e.data.images[0].src, { width: 800, quality: 85 })} 1600w`,
+				alt: e.data.images[0].alt,
+			}
+		: undefined,
+}));
 ---
 
 <Layout>
@@ -14,16 +31,24 @@ import LoopVideo from "../components/LoopVideo.astro";
 
 	<div class="py-8">
 		<div class="container mx-auto w-[80%]">
-		<Latest />
-		<div class="flex justify-end mt-4">
-			<a href="/work" class="flex items-center gap-2 text-sm hover:underline">
-				View All Work
-				<svg viewBox="0 0 20 20" class="h-4 w-4 fill-none stroke-current stroke-2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M4 10h12M12 5l5 5-5 5" />
-				</svg>
-			</a>
-		</div>
+			<Latest items={latestItems} />
+			<div class="flex justify-end mt-4">
+				<a
+					href="/work"
+					class="flex items-center gap-2 text-sm hover:underline"
+				>
+					View All Work
+					<svg
+						viewBox="0 0 20 20"
+						class="h-4 w-4 fill-none stroke-current stroke-2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						aria-hidden="true"
+					>
+						<path d="M4 10h12M12 5l5 5-5 5"></path>
+					</svg>
+				</a>
+			</div>
 		</div>
 	</div>
-	
 </Layout>

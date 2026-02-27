@@ -18,8 +18,8 @@ const navLinks = isHome ? links.filter((l) => l.href !== "/") : links;
 ---
 
 <section
+  id="site-header"
   class={[
-    // keep it above ALL page content
     "sticky top-0 w-full isolate z-[1000]",
     // homepage: sticky on mobile, but zero-height so it doesn't push content down
     isHome
@@ -105,3 +105,13 @@ const navLinks = isHome ? links.filter((l) => l.href !== "/") : links;
     </nav>
   </div>
 </section>
+
+<script is:inline>
+  function setHeaderH() {
+    const h = document.getElementById('site-header')?.offsetHeight ?? 0;
+    document.documentElement.style.setProperty('--header-h', h + 'px');
+  }
+  setHeaderH();
+  window.addEventListener('resize', setHeaderH);
+  document.addEventListener('astro:after-swap', setHeaderH);
+</script>

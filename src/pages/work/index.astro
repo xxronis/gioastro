@@ -1,63 +1,68 @@
 ---
+import '../../styles/global.css';
 import Layout from '../../layouts/Layout.astro';
-import { drupal } from '../../lib/drupal';
-import { cfImg, getImagesFromEntity } from '../../lib/jsonapi-images';
+import { getCollection } from 'astro:content';
+import { cfImg } from '../../lib/jsonapi-images';
+export const prerender = true;
 
-export const prerender = false;
+const allWorks = await getCollection('work');
 
-const works = await drupal.api<{ data: any[]; included?: any[] }>(
-  '/node/work',
-  {
-    sort: '-created',
-    'page[limit]': '20',
-    include: 'field_media,field_media.field_media_image',
-    'fields[node--work]': 'title,path,field_media',
+// Collect unique categories across all work items
+const categoryMap = new Map<string, { name: string; slug: string; count: number }>();
+for (const entry of allWorks) {
+  for (const cat of entry.data.categories ?? []) {
+    const existing = categoryMap.get(cat.slug);
+    categoryMap.set(cat.slug, { ...cat, count: (existing?.count ?? 0) + 1 });
   }
-);
-
-Astro.response.headers.set(
-  'Cache-Control',
-  'public, s-maxage=60, stale-while-revalidate=300'
-);
+}
+const categories = [...categoryMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 ---
 
 <Layout>
   <div class="container mx-auto w-[80%] py-8">
-    <h1 class="text-4xl font-semibold mb-4">Work</h1>
+    <div class="sticky top-[var(--header-h,0px)] z-10 bg-white/90 backdrop-blur-sm flex items-center justify-between gap-4 py-4 mb-4 flex-wrap">
+      <h1 class="text-4xl font-semibold">Work</h1>
+      {categories.length > 0 && (
+        <div class="flex flex-wrap gap-x-6 gap-y-1">
+          <a href="/work" class="group inline-flex items-center gap-1.5 pb-0.5 border-b-2 border-neutral-900 text-sm font-medium transition-colors hover:text-neutral-500">
+            All
+            <span class="text-xs text-neutral-400 group-hover:text-neutral-400">{allWorks.length}</span>
+          </a>
+          {categories.map((cat) => (
+            <a
+              href={`/work/category/${cat.slug}`}
+              class="group inline-flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent text-sm font-medium transition-colors hover:border-neutral-900 hover:text-neutral-900"
+            >
+              {cat.name}
+              <span class="text-xs text-neutral-400">{cat.count}</span>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
 
     <ul class="columns-1 sm:columns-2 lg:columns-3 [column-gap:1.5rem]">
-      {works.data.map((n) => {
-        const images = getImagesFromEntity(n, works.included, drupal.baseUrl);
-        const img = images[0];
-        const alias = n.attributes?.path?.alias ?? `/node/${n.id}`;
-
-        const w = img?.width;
-        const h = img?.height;
-
+      {allWorks.map((entry) => {
+        const img = entry.data.images[0];
         return (
           <li class="mb-6 break-inside-avoid">
-            <a class="group block w-full overflow-hidden shadow bg-white relative" href={alias}>
-              
-              {img?.src && (
+            <a class="group block w-full overflow-hidden shadow bg-white relative" href={entry.data.alias}>
+              {img && (
                 <img
-                  src={cfImg(img.src, { width: 600, quality: 85 })}
-                  srcset={`${cfImg(img.src, { width: 600, quality: 85 })} 600w, ${cfImg(img.src, { width: 1200, quality: 85 })} 1200w, ${cfImg(img.src, { width: 1800, quality: 85 })} 1800w`}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  src={cfImg(img.src, { width: 400, quality: 85 })}
+                  srcset={`${cfImg(img.src, { width: 400, quality: 85 })} 400w, ${cfImg(img.src, { width: 500, quality: 85 })} 600w, ${cfImg(img.src, { width: 1200, quality: 85 })} 1200w`}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 600px"
                   loading="lazy"
                   decoding="async"
                   alt={img.alt ?? ""}
-                  width={w}
-                  height={h}
+                  width={img.width}
+                  height={img.height}
                   class="block w-full h-auto"
                 />
               )}
-
-              {/* Title overlay: hover reveal on desktop, always visible on mobile */}
               <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-neutral-900/60 px-4 py-3
                           opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                <div class="text-white font-medium leading-snug">
-                  {n.attributes?.title}
-                </div>
+                <div class="text-white font-medium leading-snug">{entry.data.title}</div>
               </div>
             </a>
           </li>

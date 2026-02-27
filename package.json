@@ -3,11 +3,11 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro dev",
-    "build": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro build",
-    "preview": "NODE_TLS_REJECT_UNAUTHORIZED=0 astro preview",
+    "dev": "astro dev",
+    "build": "astro build --env local",
+    "preview": "astro preview",
     "astro": "astro",
-    "build:cf": "ASTRO_ADAPTER=cloudflare astro build",
+    "build:cf": "ASTRO_ADAPTER=cloudflare astro build --env production",
     "dev:cf": "npm run build:cf && wrangler pages dev ./dist",
     "deploy:prod": "npm run build:cf && npx wrangler pages deploy",
     "tail:prod": "npx wrangler pages deployment tail --project-name gioastro"

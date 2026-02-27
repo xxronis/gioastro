@@ -1,0 +1,97 @@
+---
+import '../../../styles/global.css';
+import Layout from '../../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { cfImg } from '../../../lib/jsonapi-images';
+import type { CollectionEntry } from 'astro:content';
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const works = await getCollection('work');
+
+  const categoryMap = new Map<string, { name: string; slug: string; count: number }>();
+  for (const entry of works) {
+    for (const cat of entry.data.categories ?? []) {
+      const existing = categoryMap.get(cat.slug);
+      categoryMap.set(cat.slug, { ...cat, count: (existing?.count ?? 0) + 1 });
+    }
+  }
+  const allCategories = [...categoryMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+  return allCategories.map((cat) => ({
+    params: { category: cat.slug },
+    props: {
+      categoryName: cat.name,
+      allCategories,
+      works: works.filter((e) =>
+        e.data.categories?.some((c) => c.slug === cat.slug)
+      ),
+    },
+  }));
+}
+
+interface Props {
+  categoryName: string;
+  allCategories: { name: string; slug: string; count: number }[];
+  works: CollectionEntry<'work'>[];
+}
+
+const { categoryName, allCategories, works } = Astro.props;
+const { category } = Astro.params;
+---
+
+<Layout>
+  <div class="container mx-auto w-[80%] py-8">
+    <div class="sticky top-[var(--header-h,0px)] z-10 bg-white/90 backdrop-blur-sm flex items-center justify-between gap-4 py-4 mb-4 flex-wrap">
+      <h1 class="text-4xl font-semibold">Work</h1>
+      <div class="flex flex-wrap gap-x-6 gap-y-1">
+          <a href="/work" class="group inline-flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent text-sm font-medium transition-colors hover:border-neutral-900 hover:text-neutral-900">
+            All
+          </a>
+          {allCategories.map((cat) => (
+            <a
+              href={`/work/category/${cat.slug}`}
+              class:list={[
+                "group inline-flex items-center gap-1.5 pb-0.5 border-b-2 text-sm font-medium transition-colors",
+                cat.slug === category
+                  ? "border-neutral-900 text-neutral-900"
+                  : "border-transparent hover:border-neutral-900 hover:text-neutral-900",
+              ]}
+            >
+              {cat.name}
+              <span class="text-xs text-neutral-400">{cat.count}</span>
+            </a>
+          ))}
+        </div>
+    </div>
+
+    <ul class="columns-1 sm:columns-2 lg:columns-3 [column-gap:1.5rem]">
+      {works.map((entry) => {
+        const img = entry.data.images[0];
+        return (
+          <li class="mb-6 break-inside-avoid">
+            <a class="group block w-full overflow-hidden shadow bg-white relative" href={entry.data.alias}>
+              {img && (
+                <img
+                  src={cfImg(img.src, { width: 600, quality: 85 })}
+                  srcset={`${cfImg(img.src, { width: 600, quality: 85 })} 600w, ${cfImg(img.src, { width: 1200, quality: 85 })} 1200w, ${cfImg(img.src, { width: 1800, quality: 85 })} 1800w`}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  loading="lazy"
+                  decoding="async"
+                  alt={img.alt ?? ""}
+                  width={img.width}
+                  height={img.height}
+                  class="block w-full h-auto"
+                />
+              )}
+              <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-neutral-900/60 px-4 py-3
+                          opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <div class="text-white font-medium leading-snug">{entry.data.title}</div>
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</Layout>
