@@ -1,0 +1,93 @@
+---
+import { cfImg } from '../lib/jsonapi-images';
+
+interface Image {
+  src: string;
+  alt?: string;
+}
+
+interface Props {
+  title: string;
+  body?: string;
+  images: Image[];
+}
+
+const { title, body = '', images } = Astro.props;
+---
+
+<div class="py-8">
+  <div class="container mx-auto w-[90%]">
+    <div class="lg:pl-[8%] grid grid-cols-1 gap-10 lg:grid-cols-3 lg:items-start">
+
+      {/* Images — 2/3 */}
+      <div class="lg:col-span-2 grid grid-cols-1 gap-6">
+        {images.map((img, i) => {
+          const id = `img-${i}`;
+          return (
+            <div>
+              <a href={`#${id}`} aria-label="View full size" class="group relative block w-full">
+                <img
+                  src={cfImg(img.src, { width: 800, quality: 85 })}
+                  srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
+                  sizes="(max-width: 768px) 100vw, 66vw"
+                  loading="lazy"
+                  decoding="async"
+                  alt={img.alt ?? ""}
+                  class="w-full h-auto object-cover shadow cursor-zoom-in"
+                />
+                <span class="pointer-events-none absolute inset-0 flex items-center justify-center
+                             opacity-0 group-hover:opacity-46 transition-opacity duration-200
+                             bg-black/25 text-white text-sm font-medium tracking-wide">
+                  Click to view full size & quality
+                </span>
+              </a>
+
+              <div id={id} class="lightbox fixed inset-0 z-[2000] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <a href="#!" class="absolute inset-0" aria-label="Close lightbox" />
+                <div class="relative max-w-[90vw] max-h-[90dvh]">
+                  <img
+                    src={img.src}
+                    alt={img.alt ?? ""}
+                    loading="lazy"
+                    decoding="async"
+                    class="max-w-full max-h-[90dvh] object-contain shadow-2xl"
+                  />
+                  <a
+                    href="#!"
+                    class="absolute -top-4 -right-4 flex h-8 w-8 items-center justify-center rounded-full text-white shadow"
+                    aria-label="Close"
+                  >
+                    <svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                      <path d="M6 6l12 12M18 6L6 18"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Details — 1/3 */}
+      <div class="space-y-6 lg:border-l lg:pl-10">
+        <div>
+          <div class="text-xs tracking-[0.3em] uppercase text-gray-500">Details</div>
+          <h1 class="mt-2 text-4xl font-semibold">{title}</h1>
+        </div>
+        <article class="prose prose-lg max-w-none">
+          <div set:html={body} />
+        </article>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && location.hash.startsWith('#img-')) {
+      location.hash = '_';
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  });
+</script>

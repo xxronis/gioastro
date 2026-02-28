@@ -2,17 +2,17 @@ import { defineConfig, envField } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import node from '@astrojs/node';
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 
 const isCloudflare = process.env.ASTRO_ADAPTER === 'cloudflare';
 
 export default defineConfig({
-  output: 'server', // hybrid SSR + SSG still works; control per-route via prerender
+  output: 'server',
   adapter: isCloudflare
     ? cloudflare()
     : node({ mode: 'standalone' }),
-    // image: {
-    //   service: { entrypoint: 'astro/assets/services/noop' } // disable sharp usage
-    // },
+  site: "https://giorgoschronopoulos.com",
+  integrations: [sitemap()],
   vite: { plugins: [tailwindcss()] },
   env: {
     schema: {

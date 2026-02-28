@@ -58,6 +58,11 @@ export const POST: APIRoute = async (context) => {
     `Email: ${email}\n\n` +
     `Message:\n${message}\n`;
 
+  const toEmails = (CONTACT_TO_EMAIL as string)
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
   const sendRes = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -66,7 +71,7 @@ export const POST: APIRoute = async (context) => {
     },
     body: JSON.stringify({
       from: CONTACT_FROM_EMAIL,
-      to: [CONTACT_TO_EMAIL],
+      to: toEmails,
       subject,
       text,
       reply_to: email,

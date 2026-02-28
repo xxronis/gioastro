@@ -49,9 +49,7 @@ const categories = [...categoryMap.values()].sort((a, b) => a.name.localeCompare
             <a class="group block w-full overflow-hidden shadow bg-white relative" href={entry.data.alias}>
               {img && (
                 <img
-                  src={cfImg(img.src, { width: 400, quality: 85 })}
-                  srcset={`${cfImg(img.src, { width: 400, quality: 85 })} 400w, ${cfImg(img.src, { width: 500, quality: 85 })} 600w, ${cfImg(img.src, { width: 1200, quality: 85 })} 1200w`}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 600px"
+                  src={cfImg(img.src, { width: 400, quality: 55 })}
                   loading="lazy"
                   decoding="async"
                   alt={img.alt ?? ""}
