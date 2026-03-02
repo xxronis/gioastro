@@ -79,6 +79,7 @@ export const POST: APIRoute = async (context) => {
   });
 
   if (!sendRes.ok) {
+    console.error("Failed to send contact email:", await sendRes.text());
     return Response.redirect(new URL("/contact?error=send", context.url), 303);
   }
 

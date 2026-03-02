@@ -4,6 +4,7 @@ import { cfImg, getImagesFromWork } from '../../lib/jsonapi-images';
 import Layout from '../../layouts/Layout.astro';
 import WorkDetail from '../../components/WorkDetail.astro';
 import { parseMeta } from '../../lib/metatag';
+import { resolveStatusLabel } from '../../lib/field-utils';
 import type { DrupalMetaTag } from '../../lib/metatag';
 
 export const prerender = false;
@@ -21,7 +22,7 @@ if (!route || route?.entity?.type !== 'node') {
 
 const nodeDoc = await drupal.api<JsonApiDoc>(
   `/node/work/${route.entity.uuid}`,
-  { include: 'field_media,field_media.field_media_image', 'fields[node--work]': 'title,body,field_media,metatag' }
+  { include: 'field_media,field_media.field_media_image,field_tags,field_category', 'fields[node--work]': 'title,body,field_media,field_tags,field_category,field_status,metatag' }
 );
 
 const node = nodeDoc.data;
@@ -29,6 +30,38 @@ const title = node?.attributes?.title ?? 'Work';
 const body = node?.attributes?.body?.processed ?? '';
 const images = getImagesFromWork(nodeDoc, drupal.baseUrl);
 const meta = parseMeta((node?.attributes?.metatag ?? []) as DrupalMetaTag[]);
+
+// Resolve field_category from included
+const catRels: any[] = node?.relationships?.field_category?.data ?? [];
+const categories = catRels
+  .map((rel: any) => {
+    const term = includedArr.find((i: any) => i.type === rel.type && i.id === rel.id);
+    const name: string = term?.attributes?.name ?? '';
+    const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    return name ? { name, slug } : null;
+  })
+  .filter(Boolean) as { name: string; slug: string }[];
+
+// Resolve field_tags from included
+const includedArr: any[] = nodeDoc.included ?? [];
+const tagRels: any[] = node?.relationships?.field_tags?.data ?? [];
+const tags = tagRels
+  .map((rel: any) => {
+    const term = includedArr.find((i: any) => i.type === rel.type && i.id === rel.id);
+    const name: string = term?.attributes?.name ?? '';
+    const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    return name ? { name, slug } : null;
+  })
+  .filter(Boolean) as { name: string; slug: string }[];
+
+// field_status is a list_string field — resolve key to human-readable label
+const rawStatuses: any = node?.attributes?.field_status;
+const statuses: string[] = (Array.isArray(rawStatuses) ? rawStatuses : [])
+  .map((v: any) => {
+    const key = typeof v === 'string' ? v : (v?.value ?? '');
+    return key ? resolveStatusLabel(key) : '';
+  })
+  .filter(Boolean);
 
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 ---
@@ -38,7 +71,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-re
   description={meta.description}
   ogTitle={meta.ogTitle}
   ogDescription={meta.ogDescription}
-  ogImage={meta.ogImage}
+  ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, height: 630, quality: 85 }) : undefined)}
 >
-  <WorkDetail title={title} body={body} images={images} />
+  <WorkDetail title={title} body={body} images={images} statuses={statuses} tags={tags} categories={categories} />
 </Layout>

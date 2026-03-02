@@ -8,6 +8,7 @@ export const prerender = true;
 export async function getStaticPaths() {
   const works = await getCollection('work');
 
+  // Build category map for nav
   const categoryMap = new Map<string, { name: string; slug: string; count: number }>();
   for (const entry of works) {
     for (const cat of entry.data.categories ?? []) {
@@ -17,36 +18,45 @@ export async function getStaticPaths() {
   }
   const allCategories = [...categoryMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 
-  return allCategories.map((cat) => ({
-    params: { category: cat.slug },
+  // Build tag map
+  const tagMap = new Map<string, { name: string; slug: string }>();
+  for (const entry of works) {
+    for (const tag of entry.data.tags ?? []) {
+      if (!tagMap.has(tag.slug)) tagMap.set(tag.slug, tag);
+    }
+  }
+
+  return [...tagMap.values()].map((tag) => ({
+    params: { slug: tag.slug },
     props: {
-      categoryName: cat.name,
+      tagName: tag.name,
       allCategories,
       totalCount: works.length,
-      works: works.filter((e) => e.data.categories?.some((c) => c.slug === cat.slug)),
+      works: works.filter((e) => e.data.tags?.some((t) => t.slug === tag.slug)),
     },
   }));
 }
 
 interface Props {
-  categoryName: string;
+  tagName: string;
   allCategories: { name: string; slug: string; count: number }[];
   totalCount: number;
   works: CollectionEntry<'work'>[];
 }
 
-const { categoryName, allCategories, totalCount, works } = Astro.props;
-const { category } = Astro.params;
+const { tagName, allCategories, totalCount, works } = Astro.props;
+const { slug } = Astro.params;
 ---
 
 <Layout
-  title={categoryName}
-  description={`${categoryName} paintings by Giorgos Chronopoulos.`}
+  title={tagName}
+  description={`Works tagged "${tagName}" by Giorgos Chronopoulos.`}
 >
   <WorkGrid
     works={works}
     allCategories={allCategories}
     totalCount={totalCount}
-    activeCategory={category}
+    activeTag={slug}
+    filterLabel={tagName}
   />
 </Layout>

@@ -3,6 +3,7 @@ import { loadEnv } from 'vite';
 import { z } from 'astro/zod';
 import type { Loader, LoaderContext } from 'astro/loaders';
 import { getImagesFromEntity } from './lib/jsonapi-images';
+import { resolveStatusLabel } from './lib/field-utils';
 
 // loadEnv reads .env, .env.local, .env.production etc. from the project root.
 // '' = load ALL vars (not just VITE_-prefixed ones).
@@ -43,6 +44,11 @@ export const workSchema = z.object({
     name: z.string(),
     slug: z.string(),
   })).optional(),
+  tags: z.array(z.object({
+    name: z.string(),
+    slug: z.string(),
+  })).optional(),
+  statuses: z.array(z.string()).optional(),
   created: z.string().optional(),
   metatag: z.array(z.object({
     tag: z.string(),
@@ -65,14 +71,14 @@ export function drupalWorkLoader(options: {
       logger.info('Fetching work entries from Drupal JSON:API...');
       store.clear();
 
+      const apiBase = asBaseUrl(options.apiBase);
       let response: { data: any[]; included?: any[] };
       try {
-        const apiBase = asBaseUrl(options.apiBase);
         const url = new URL('node/work', apiBase);
         url.searchParams.set('sort', '-created');
         url.searchParams.set('page[limit]', '100');
-        url.searchParams.set('include', 'field_category,field_media,field_media.field_media_image');
-        url.searchParams.set('fields[node--work]', 'title,path,body,created,promote,field_category,field_media,metatag');
+        url.searchParams.set('include', 'field_category,field_tags,field_media,field_media.field_media_image');
+        url.searchParams.set('fields[node--work]', 'title,path,body,created,promote,field_category,field_tags,field_status,field_media,metatag');
 
         const res = await fetch(url.toString(), { headers: { Accept: 'application/vnd.api+json' } });
         if (!res.ok) throw new Error(`JSON:API ${res.status}: ${url.pathname}`);
@@ -99,6 +105,26 @@ export function drupalWorkLoader(options: {
           })
           .filter(Boolean) as { name: string; slug: string }[];
 
+        // Resolve field_tags taxonomy terms from included
+        const tagRels: any[] = node.relationships?.field_tags?.data ?? [];
+        const tags = tagRels
+          .map((rel: any) => {
+            const term = includedMap.get(`${rel.type}::${rel.id}`);
+            const name: string = term?.attributes?.name ?? '';
+            const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            return name ? { name, slug } : null;
+          })
+          .filter(Boolean) as { name: string; slug: string }[];
+
+        // field_status is a list_string field — resolve key to human-readable label
+        const rawStatuses: any = node.attributes?.field_status;
+        const statuses: string[] = (Array.isArray(rawStatuses) ? rawStatuses : [])
+          .map((v: any) => {
+            const key = typeof v === 'string' ? v : (v?.value ?? '');
+            return key ? resolveStatusLabel(key) : '';
+          })
+          .filter(Boolean);
+
         const entry = await parseData({
           id: node.id,
           data: {
@@ -108,6 +134,8 @@ export function drupalWorkLoader(options: {
             body: node.attributes?.body?.processed ?? undefined,
             images,
             categories: categories.length ? categories : undefined,
+            tags: tags.length ? tags : undefined,
+            statuses: statuses.length ? statuses : undefined,
             metatag: node.attributes?.metatag ?? [],
           },
         });

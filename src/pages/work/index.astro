@@ -1,13 +1,11 @@
 ---
-import '../../styles/global.css';
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
-import { cfImg } from '../../lib/jsonapi-images';
+import WorkGrid from '../../components/WorkGrid.astro';
 export const prerender = true;
 
 const allWorks = await getCollection('work');
 
-// Collect unique categories across all work items
 const categoryMap = new Map<string, { name: string; slug: string; count: number }>();
 for (const entry of allWorks) {
   for (const cat of entry.data.categories ?? []) {
@@ -19,53 +17,5 @@ const categories = [...categoryMap.values()].sort((a, b) => a.name.localeCompare
 ---
 
 <Layout description="Original watercolor paintings and fine art works by Giorgos Chronopoulos.">
-  <div class="container mx-auto w-[80%] py-8">
-    <div class="sticky top-[var(--header-h,0px)] z-10 bg-white/90 backdrop-blur-sm flex items-center justify-between gap-4 py-4 mb-4 flex-wrap">
-      <h1 class="text-4xl font-semibold">Work</h1>
-      {categories.length > 0 && (
-        <div class="flex flex-wrap gap-x-6 gap-y-1">
-          <a href="/work" class="group inline-flex items-center gap-1.5 pb-0.5 border-b-2 border-neutral-900 text-sm font-medium transition-colors hover:text-neutral-500">
-            All
-            <span class="text-xs text-neutral-400 group-hover:text-neutral-400">{allWorks.length}</span>
-          </a>
-          {categories.map((cat) => (
-            <a
-              href={`/work/category/${cat.slug}`}
-              class="group inline-flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent text-sm font-medium transition-colors hover:border-neutral-900 hover:text-neutral-900"
-            >
-              {cat.name}
-              <span class="text-xs text-neutral-400">{cat.count}</span>
-            </a>
-          ))}
-        </div>
-      )}
-    </div>
-
-    <ul class="columns-1 sm:columns-2 lg:columns-3 [column-gap:1.5rem]">
-      {allWorks.map((entry) => {
-        const img = entry.data.images[0];
-        return (
-          <li class="mb-6 break-inside-avoid">
-            <a class="group block w-full overflow-hidden shadow bg-white relative" href={entry.data.alias}>
-              {img && (
-                <img
-                  src={cfImg(img.src, { width: 400, quality: 55 })}
-                  loading="lazy"
-                  decoding="async"
-                  alt={img.alt ?? ""}
-                  width={img.width}
-                  height={img.height}
-                  class="block w-full h-auto"
-                />
-              )}
-              <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-neutral-900/60 px-4 py-3
-                          opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                <div class="text-white font-medium leading-snug">{entry.data.title}</div>
-              </div>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
+  <WorkGrid works={allWorks} allCategories={categories} totalCount={allWorks.length} />
 </Layout>

@@ -20,7 +20,7 @@ export async function getStaticPaths() {
 
 interface Props { entry: CollectionEntry<'work'> }
 const { entry } = Astro.props;
-const { title, body, images, metatag } = entry.data;
+const { title, body, images, metatag, tags, statuses, categories } = entry.data;
 const meta = parseMeta(metatag);
 ---
 
@@ -29,8 +29,8 @@ const meta = parseMeta(metatag);
   description={meta.description}
   ogTitle={meta.title ?? title}
   ogDescription={meta.description}
-  ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, quality: 85 }) : undefined)}
+  ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, height: 630, quality: 85 }) : undefined)}
 >
-  <WorkDetail title={title} body={body} images={images} />
+  <WorkDetail title={title} body={body} images={images} statuses={statuses} tags={tags} categories={categories} />
 </Layout>
 

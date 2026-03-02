@@ -63,15 +63,16 @@ export function getImagesFromEntity(
 
 const MEDIA = 'https://media.getreal.gr';
 
-export function cfImg(originPathOrUrl: string, opts: { width?: number; quality?: number } = {}) {
+export function cfImg(originPathOrUrl: string, opts: { width?: number; height?: number; quality?: number } = {}) {
   const originUrl = originPathOrUrl.startsWith('http')
     ? originPathOrUrl
     : `${MEDIA}/${originPathOrUrl.replace(/^\//, '')}`;
 
-  const { width = 600, quality = 85 } = opts;
+  const { width = 600, height = 630, quality = 85 } = opts;
 
   const parts = [
     width ? `width=${width}` : null,
+    height ? `height=${height}` : null,
     `quality=${quality}`,
     'format=auto',
   ].filter(Boolean).join(',');
