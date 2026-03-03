@@ -14,6 +14,11 @@ export default defineConfig({
   site: "https://giorgoschronopoulos.com",
   integrations: [sitemap()],
   vite: { plugins: [tailwindcss()] },
+  prefetch: {
+    delay: 200,
+    onHover: true,
+    onViewport: true,
+  },
   env: {
     schema: {
       DRUPAL_BASE_URL:           envField.string({ context: 'server', access: 'secret' }),

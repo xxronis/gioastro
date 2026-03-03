@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { cfImg } from '../lib/jsonapi-images';
 
 interface Image {
@@ -29,14 +30,16 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
           return (
             <div>
               <a href={`#${id}`} aria-label="View full size" class="group relative block w-full">
-                <img
+                <Image
                   src={cfImg(img.src, { width: 800, quality: 85 })}
                   srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
                   sizes="(max-width: 768px) 100vw, 66vw"
-                  loading="lazy"
+                  loading="eager"
                   decoding="async"
                   alt={img.alt ?? ""}
                   class="w-full h-auto object-cover shadow cursor-zoom-in"
+                  width={800}
+                  height={800}
                 />
                 <span class="pointer-events-none absolute inset-0 flex items-center justify-center
                              opacity-0 group-hover:opacity-46 transition-opacity duration-200

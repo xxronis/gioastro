@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { parseMeta } from '../lib/metatag';
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 export const prerender = true;
 
 export async function getStaticPaths() {
@@ -34,12 +35,12 @@ const meta = parseMeta(metatag);
       <div class="lg:pl-[8%] grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
         {images && images.length > 0 && images.map((img) => (
           <div class="flex items-center justify-center">
-            <img
+            <Image
               src={img.src}
               alt={img.alt}
-              width={img.width}
-              height={img.height}
-              loading="lazy"
+              width={img.width ?? 800}
+              height={img.height ?? 600}
+              loading="eager"
               class="max-w-full max-h-full object-contain shadow"
             />
           </div>

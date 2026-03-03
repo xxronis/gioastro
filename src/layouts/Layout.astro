@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { ClientRouter } from "astro:transitions";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import type { TransitionAnimationPair } from 'astro';
 
 interface Props {
   title?: string;
@@ -30,6 +31,40 @@ const resolvedOgTitle = ogTitle ?? title ?? SITE_TITLE;
 const resolvedOgDesc = ogDescription ?? description;
 const canonicalUrl = Astro.url.href;
 const resolvedOgImage = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.url).href;
+
+const forwards: TransitionAnimationPair = {
+  old: {
+    name: "fadeOutUp",
+    duration: "0.2s",
+    easing: "ease-in",
+    fillMode: "forwards",
+  },
+  new: {
+    name: "fadeInUp",
+    duration: "0.3s",
+    delay: "0.1s",
+    easing: "ease-out",
+    fillMode: "backwards",
+  },
+};
+
+const backwards: TransitionAnimationPair = {
+  old: {
+    name: "fadeOutDown",
+    duration: "0.2s",
+    easing: "ease-in",
+    fillMode: "forwards",
+  },
+  new: {
+    name: "fadeInDown",
+    duration: "0.3s",
+    delay: "0.1s",
+    easing: "ease-out",
+    fillMode: "backwards",
+  },
+};
+
+const viewTransition = { forwards, backwards };
 ---
 
 <!doctype html>
@@ -39,6 +74,7 @@ const resolvedOgImage = ogImage.startsWith('http') ? ogImage : new URL(ogImage, 
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{pageTitle}</title>
+    <ClientRouter />
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonicalUrl} />
 
@@ -50,14 +86,44 @@ const resolvedOgImage = ogImage.startsWith('http') ? ogImage : new URL(ogImage, 
     {resolvedOgDesc && <meta property="og:description" content={resolvedOgDesc} />}
     <meta property="og:image" content={resolvedOgImage} />
   </head>
-  <body transition:animate="fade">
-    <ClientRouter />
+  <body>
     <div class="flex flex-col min-h-screen">
         <Header/>
-        <main class="flex-1">
+        <main class="flex-1" transition:animate={viewTransition}>
             <slot />
         </main>
         <Footer />
     </div>
   </body>
 </html>
+
+<style is:global>
+  @keyframes fadeOutUp {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-16px); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeOutDown {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(16px); }
+  }
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<!-- <script>
+  function checkMobile() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      document.body.classList.add('mobile');
+      return true;
+    }
+    return false;
+  }
+  checkMobile();
+</script> -->
