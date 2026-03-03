@@ -13,7 +13,7 @@ Data & integration patterns (Drupal JSON:API)
   - `api<T>(path, params?)` — server-side helper that builds a URL from `import.meta.env.DRUPAL_API_BASE`, sets Accept header to `application/vnd.api+json`, and returns parsed JSON or throws on non-OK responses.
   - `resolveAlias(alias)` — resolves a Drupal path using `DRUPAL_BASE_URL` + `/router/translate-path`.
 - Examples:
-  - `src/components/Latest.drupal.astro` calls `await api('/node/work', { 'sort': '-created', 'page[limit]': '10' })` and maps `articles.data`.
+  - `src/components/Latest.astro` calls `await api('/node/work', { 'sort': '-created', 'page[limit]': '10' })` and maps `articles.data`.
   - Image fields are accessed from the JSON:API response as `n.attributes.field_image?.uri.url` and alt text at `n.attributes.field_image?.resourceIdObjMeta.alt` — follow this shape when rendering images.
 - Naming convention: files with `.drupal.astro` indicate data-driven components that call the JSON:API server at component top-level frontmatter (run on the server during build/dev). Use `await` in frontmatter for server-side fetches.
 
@@ -51,7 +51,7 @@ Quick examples to follow when adding features
 
 Files to inspect first
 - `src/lib/drupal.ts` — API helpers and env usage
-- `src/components/Latest.drupal.astro` — example JSON:API query + rendering
+- `src/components/Latest.astro` — example JSON:API query + rendering
 - `src/components/LoopVideo.astro` — asset import/usage pattern
 - `src/pages/index.astro` and `src/layouts/Layout.astro` — page composition / layout
 

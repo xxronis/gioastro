@@ -28,8 +28,8 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
         {images.map((img, i) => {
           const id = `img-${i}`;
           return (
-            <div>
-              <a href={`#${id}`} aria-label="View full size" class="group relative block w-full">
+            <div class="flex">
+              <a href={`#${id}`} aria-label="View full size" class="group relative inline-block">
                 <Image
                   src={cfImg(img.src, { width: 800, quality: 85 })}
                   srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
@@ -37,7 +37,7 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
                   loading="eager"
                   decoding="async"
                   alt={img.alt ?? ""}
-                  class="w-full h-auto object-cover shadow cursor-zoom-in"
+                  class="h-auto object-cover shadow cursor-zoom-in"
                   width={800}
                   height={800}
                 />

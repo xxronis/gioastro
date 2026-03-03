@@ -204,7 +204,7 @@ export const prerender = false;
 
 ---
 
-## Fix 6 — Homepage (`/`) static + `Latest.drupal.astro` from collection
+## Fix 6 — Homepage (`/`) static + `Latest.astro` from collection
 
 ### The problem
 `src/pages/index.astro` has no explicit `prerender` flag → it defaults to SSR.
@@ -233,7 +233,7 @@ Remove the frontmatter data fetch entirely. Accept an `items` prop instead:
 
 ```astro
 ---
-// src/components/Latest.drupal.astro
+// src/components/Latest.astro
 import { cfImg } from "../lib/jsonapi-images";
 
 interface WorkItem {
@@ -251,7 +251,7 @@ const { items } = Astro.props;
 ---
 // src/pages/index.astro
 import { getCollection } from 'astro:content';
-import Latest from '../components/Latest.drupal.astro';
+import Latest from '../components/Latest.astro';
 import { cfImg } from '../lib/jsonapi-images';
 export const prerender = true;
 
@@ -280,7 +280,7 @@ const items = featured.map((e) => ({
 |---|---|
 | `src/content.config.ts` | Use `loadEnv`, pass `{ baseUrl, apiBase }` to loader; add `promoted` field |
 | `src/pages/index.astro` | `prerender = true`; fetch from `getCollection`; pass items to Latest |
-| `src/components/Latest.drupal.astro` | Remove SSR fetch; accept `items` prop |
+| `src/components/Latest.astro` | Remove SSR fetch; accept `items` prop |
 | `src/pages/work/index.astro` | `prerender = true`, `getCollection`, load-more button |
 | `src/pages/work/[slug].astro` | `prerender = true`, `getStaticPaths` from collection |
 | `src/pages/work/[...slug].astro` | New SSR fallback (rename/copy from current `[slug].astro`) |
