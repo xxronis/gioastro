@@ -4,6 +4,7 @@ import { ClientRouter } from "astro:transitions";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import type { TransitionAnimationPair } from 'astro';
+import LoopVideo from '../components/LoopVideo.astro';
 
 interface Props {
   title?: string;
@@ -65,6 +66,8 @@ const backwards: TransitionAnimationPair = {
 };
 
 const viewTransition = { forwards, backwards };
+const pathname = Astro.url.pathname;
+const isHome = pathname === "/";
 ---
 
 <!doctype html>
@@ -90,7 +93,14 @@ const viewTransition = { forwards, backwards };
     <div class="flex flex-col min-h-screen">
         <Header/>
         <main class="flex-1" transition:animate={viewTransition}>
+          {isHome && (
+            <div class="h-[calc(100vh)] md:h-[calc(100vh-10rem)] lg:h-[calc(100vh-26rem)] w-full bg-[url('/bg1.webp')] bg-cover bg-position-12% lg:bg-[position:0_20%] relative" style="touch-action: pan-y;">
+              <LoopVideo />
+            </div>
+          )}
+          <div class="container mx-auto w-[90%] lg:w-[80%] py-4 md:py-6">
             <slot />
+          </div>
         </main>
         <Footer />
     </div>

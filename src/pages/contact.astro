@@ -6,6 +6,7 @@ import image from "../assets/more.webp";
 const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 const sent = Astro.url.searchParams.get("sent") === "1";
 const error = Astro.url.searchParams.get("error");
+const inquiry = Astro.url.searchParams.get("inquiry");
 ---
 
 <Layout>
@@ -30,8 +31,8 @@ const error = Astro.url.searchParams.get("error");
     });
   </script>
 
-  <div class="py-8">
-    <div class="container mx-auto w-[80%]">
+  <!-- <div class="py-8">
+    <div class="container mx-auto w-[90%] lg:w-[80%]"> -->
       <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start lg:pl-[8%]">
         <div class="space-y-6">
           <div class="flex items-center justify-center">
@@ -41,14 +42,14 @@ const error = Astro.url.searchParams.get("error");
                   loading="eager"
                   height="500"
                   width="500"
-                  class="max-w-full max-h-[700px] object-contain shadow"
+                  class="w-full max-h-[300px] lg:max-h-[600px] object-cover lg:object-contain"
               />
           </div>
         </div>
 
         <div class="space-y-6 lg:border-l lg:pl-10">
           <div>
-            <h1 class="mt-2 text-4xl font-semibold">Contact</h1>
+            <h1 class="mt-2 text-4xl font-semibold">{inquiry === "commission" ? "Commission Inquiry" : "Contact"}</h1>
           </div>
 
           {sent ? (
@@ -130,6 +131,6 @@ const error = Astro.url.searchParams.get("error");
           </p>
         </div>
       </div>
-    </div>
-  </div>
+    <!-- </div>
+  </div> -->
 </Layout>

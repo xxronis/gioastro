@@ -35,6 +35,14 @@ const { webm, poster, className = "", headlineType = "home-lead" } = Astro.props
                     <>
                         {/* <h1 class="home-lead">Giorgos Chronopoulos</h1> */}
                         <p class="text-lg home-sub-lead">Contemporary artist based in Athens, Greece</p>
+                        <div class=" flex mt-4 text-sm home-description">
+                            <a href="/work" class="inline-block mt-4 px-4 py-2 border border-white text-sm font-medium rounded hover:bg-white hover:text-black transition-colors">
+                                View Artwork
+                            </a>
+                            <a href="/contact?inquiry=commission" class="inline-block mt-4 ml-4 px-4 py-2 border border-white text-sm font-medium rounded hover:bg-white hover:text-black transition-colors">
+                                Commission Inquiry
+                            </a>
+                        </div>
                     </>
                 ) : (
                     <h1 class="not-found">Page not found!</h1>
