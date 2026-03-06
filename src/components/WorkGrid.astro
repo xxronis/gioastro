@@ -110,15 +110,48 @@ const isAll = !activeCategory && !activeTag;
     if (!header) return;
 
     if (bar && isMobile()) {
-      // Grid page + mobile: header scrolls naturally, bar sticks to top
       header.style.position = 'relative';
       bar.style.top = '0px';
+
+      // Grid-to-grid: if user had scrolled past header, restore that state
+      try {
+        if (sessionStorage.getItem('wgPastHeader') === '1') {
+          sessionStorage.removeItem('wgPastHeader');
+          var hh = header.offsetHeight;
+          // Only scroll if page is tall enough to keep header off-screen
+          if (document.documentElement.scrollHeight > window.innerHeight + hh) {
+            window.scrollTo(0, hh);
+          }
+        }
+      } catch (e) {}
     } else {
-      // Non-grid or desktop: restore sticky header
       header.style.position = '';
       if (bar) bar.style.top = '';
+      try { sessionStorage.removeItem('wgPastHeader'); } catch (e) {}
     }
   }
+
+  // Before navigating away: save whether header was scrolled off
+  function saveState() {
+    var header = document.getElementById('site-header');
+    var bar = document.getElementById('work-grid-bar');
+    if (!bar || !header || !isMobile()) return;
+    try {
+      if (window.scrollY >= header.offsetHeight) {
+        sessionStorage.setItem('wgPastHeader', '1');
+      } else {
+        sessionStorage.removeItem('wgPastHeader');
+      }
+    } catch (e) {}
+  }
+
+  // Capture state on any click (fires before full navigation)
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href]');
+    if (a) saveState();
+  }, true);
+
+  document.addEventListener('astro:before-swap', saveState);
 
   apply();
   window.addEventListener('resize', apply);

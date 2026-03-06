@@ -29,7 +29,7 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
           const id = `img-${i}`;
           return (
             <div class="flex">
-              <a href={`#${id}`} aria-label="View full size" class="group relative inline-block">
+              <a href={`#${id}`} aria-label="View full size" class="group relative inline-block" id="light">
                 <Image
                   src={cfImg(img.src, { width: 800, quality: 85 })}
                   srcset={`${cfImg(img.src, { width: 800, quality: 85 })} 800w, ${cfImg(img.src, { width: 1600, quality: 85 })} 1600w`}
@@ -46,8 +46,9 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
                              bg-black/25 text-white text-sm font-medium tracking-wide">
                   Click to view full size & quality
                 </span>
+                <p><pre class="text-center p-2 lg:hidden md:hidden text-[9px] ">Tap for better image quality</pre></p>
               </a>
-
+              
               <div id={id} class="lightbox fixed inset-0 z-[2000] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                 <a href="#!" class="absolute inset-0" aria-label="Close lightbox" />
                 <div class="relative max-w-[90vw] max-h-[90dvh]">
@@ -134,3 +135,14 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
     }
   });
 </script>
+
+<style>
+  /* Drop header below lightbox when any lightbox is open — pure CSS, no JS needed */
+  :global(body:has(.lightbox:target) #site-header) {
+    z-index: 0;
+  }
+  :global(body:has(.lightbox:target) #light) {
+    height: 0;
+    width: 0;
+  }
+</style>
