@@ -25,7 +25,7 @@ const isAll = !activeCategory && !activeTag;
 
 <!-- <div class="container mx-auto w-[90%] lg:w-[80%] py-8"> -->
 {title && (
-  <div class="sticky top-[var(--header-h,0px)] z-10 bg-white/90 backdrop-blur-sm flex items-center justify-between gap-4 py-4 mb-4 flex-wrap" transition:animate="none">
+  <div id="work-grid-bar" class="sticky top-[var(--header-h,0px)] z-10 bg-white/90 backdrop-blur-sm flex items-center justify-between gap-4 py-4 mb-4 flex-wrap" transition:animate="none">
     
       <h1 class="text-4xl font-semibold">
         Work
@@ -99,3 +99,29 @@ const isAll = !activeCategory && !activeTag;
   })}
 </ul>
 <!-- </div> -->
+
+<script is:inline data-astro-rerun>
+(function () {
+  function isMobile() { return window.innerWidth < 1024; }
+
+  function apply() {
+    var header = document.getElementById('site-header');
+    var bar = document.getElementById('work-grid-bar');
+    if (!header) return;
+
+    if (bar && isMobile()) {
+      // Grid page + mobile: header scrolls naturally, bar sticks to top
+      header.style.position = 'relative';
+      bar.style.top = '0px';
+    } else {
+      // Non-grid or desktop: restore sticky header
+      header.style.position = '';
+      if (bar) bar.style.top = '';
+    }
+  }
+
+  apply();
+  window.addEventListener('resize', apply);
+  document.addEventListener('astro:page-load', apply);
+})();
+</script>
