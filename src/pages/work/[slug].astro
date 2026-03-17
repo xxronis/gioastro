@@ -3,22 +3,37 @@ import { getCollection } from 'astro:content';
 import { cfImg } from '../../lib/jsonapi-images';
 import Layout from '../../layouts/Layout.astro';
 import WorkDetail from '../../components/WorkDetail.astro';
+import WorkPrevNext from '../../components/WorkPrevNext.astro';
 import { parseMeta } from '../../lib/metatag';
 import type { CollectionEntry } from 'astro:content';
 export const prerender = true;
 
 export async function getStaticPaths() {
   const works = await getCollection('work');
-  return works
-    .filter((e) => !!e.data.alias)
-    .map((entry) => {
-      const slug = entry.data.alias.split('/').filter(Boolean).pop() ?? entry.id;
-      return { params: { slug }, props: { entry } };
-    });
+  const navWorks = works.filter((e) => !!e.data.alias);
+
+  return navWorks.map((entry, index) => {
+    const slug = entry.data.alias.split('/').filter(Boolean).pop() ?? entry.id;
+
+    const prevEntry = index > 0 ? navWorks[index - 1] : undefined;
+    const nextEntry = index < navWorks.length - 1 ? navWorks[index + 1] : undefined;
+
+    const prev = prevEntry ? { href: prevEntry.data.alias, title: prevEntry.data.title } : undefined;
+    const next = nextEntry ? { href: nextEntry.data.alias, title: nextEntry.data.title } : undefined;
+
+    return { params: { slug }, props: { entry, prev, next } };
+  });
 }
 
-interface Props { entry: CollectionEntry<'work'> }
+interface NavItem { href: string; title: string }
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+  prev?: NavItem;
+  next?: NavItem;
+}
 const { entry } = Astro.props;
+const { prev, next } = Astro.props;
 const { title, body, images, metatag, tags, statuses, categories } = entry.data;
 const meta = parseMeta(metatag);
 ---
@@ -30,6 +45,7 @@ const meta = parseMeta(metatag);
   ogDescription={meta.description}
   ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, height: 630, quality: 85 }) : undefined)}
 >
+  <WorkPrevNext currentTitle={title} prev={prev} next={next} />
   <WorkDetail title={title} body={body} images={images} statuses={statuses} tags={tags} categories={categories} />
 </Layout>
 

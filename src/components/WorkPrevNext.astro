@@ -1,0 +1,65 @@
+---
+interface NavItem {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  currentTitle?: string;
+  prev?: NavItem;
+  next?: NavItem;
+}
+
+const { currentTitle, prev, next } = Astro.props;
+---
+
+<nav aria-label="Work navigation" class="mb-6">
+  <div class="flex items-center justify-between gap-4">
+    <div class="min-w-0 flex-1">
+          <div class="mb-3 text-sm text-neutral-600">
+    <a href="/work" class="hover:text-neutral-900 transition-colors">Work</a>
+    {currentTitle && (
+      <>
+        <span class="mx-2 text-neutral-300" aria-hidden="true">/</span>
+        <span class="text-neutral-900 font-medium">{currentTitle}</span>
+      </>
+    )}
+  </div>
+      {prev ? (
+        <a
+          href={prev.href}
+          class="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+          aria-label={`Previous work: ${prev.title}`}
+        >
+          <span aria-hidden="true">←</span>
+          <span class="shrink-0">Prev</span>
+          <span class="truncate">{prev.title}</span>
+        </a>
+      ) : (
+        <span class="inline-flex items-center gap-2 text-sm text-neutral-300 select-none">
+          <span aria-hidden="true">←</span>
+          <span>Prev</span>
+        </span>
+      )}
+    </div>
+
+    <div class="min-w-0 flex-1 text-right">
+      {next ? (
+        <a
+          href={next.href}
+          class="inline-flex items-center justify-end gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+          aria-label={`Next work: ${next.title}`}
+        >
+          <span class="truncate">{next.title}</span>
+          <span class="shrink-0">Next</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      ) : (
+        <span class="inline-flex items-center justify-end gap-2 text-sm text-neutral-300 select-none">
+          <span>Next</span>
+          <span aria-hidden="true">→</span>
+        </span>
+      )}
+    </div>
+  </div>
+</nav>

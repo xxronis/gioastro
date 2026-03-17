@@ -3,9 +3,11 @@ import { drupal } from '../../lib/drupal';
 import { cfImg, getImagesFromWork } from '../../lib/jsonapi-images';
 import Layout from '../../layouts/Layout.astro';
 import WorkDetail from '../../components/WorkDetail.astro';
+import WorkPrevNext from '../../components/WorkPrevNext.astro';
 import { parseMeta } from '../../lib/metatag';
 import { resolveStatusLabel } from '../../lib/field-utils';
 import type { DrupalMetaTag } from '../../lib/metatag';
+import { getCollection } from 'astro:content';
 
 export const prerender = false;
 
@@ -31,7 +33,22 @@ const body = node?.attributes?.body?.processed ?? '';
 const images = getImagesFromWork(nodeDoc, drupal.baseUrl);
 const meta = parseMeta((node?.attributes?.metatag ?? []) as DrupalMetaTag[]);
 
+function normalizePath(p: string): string {
+  return p.replace(/\/+$/, '') || '/';
+}
+
+// Prev/Next from the work content collection (if available)
+const allWorks = await getCollection('work');
+const navWorks = allWorks.filter((e) => !!e.data.alias);
+const currentAlias = normalizePath(alias);
+const currentIndex = navWorks.findIndex((e) => normalizePath(e.data.alias) === currentAlias);
+const prevEntry = currentIndex > 0 ? navWorks[currentIndex - 1] : undefined;
+const nextEntry = currentIndex >= 0 && currentIndex < navWorks.length - 1 ? navWorks[currentIndex + 1] : undefined;
+const prev = prevEntry ? { href: prevEntry.data.alias, title: prevEntry.data.title } : undefined;
+const next = nextEntry ? { href: nextEntry.data.alias, title: nextEntry.data.title } : undefined;
+
 // Resolve field_category from included
+const includedArr: any[] = nodeDoc.included ?? [];
 const catRels: any[] = node?.relationships?.field_category?.data ?? [];
 const categories = catRels
   .map((rel: any) => {
@@ -43,7 +60,6 @@ const categories = catRels
   .filter(Boolean) as { name: string; slug: string }[];
 
 // Resolve field_tags from included
-const includedArr: any[] = nodeDoc.included ?? [];
 const tagRels: any[] = node?.relationships?.field_tags?.data ?? [];
 const tags = tagRels
   .map((rel: any) => {
@@ -73,5 +89,6 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-re
   ogDescription={meta.ogDescription}
   ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, height: 630, quality: 85 }) : undefined)}
 >
+  <WorkPrevNext currentTitle={title} prev={prev} next={next} />
   <WorkDetail title={title} body={body} images={images} statuses={statuses} tags={tags} categories={categories} />
 </Layout>
