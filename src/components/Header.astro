@@ -3,9 +3,11 @@ const { pathname } = Astro.url;
 const isHome = pathname === "/";
 
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/work", label: "Work" },
+  // { href: "/", label: "Home" },
   { href: "/about", label: "About" },
+  { href: "/work", label: "Work" },
+  { href: "/news", label: "News & Events" },
+  
   { href: "/contact", label: "Contact" },
 ];
 
@@ -14,7 +16,9 @@ const isActive = (href: string) => {
   return pathname === href || pathname.startsWith(href + "/");
 };
 
-const navLinks = isHome ? links.filter((l) => l.href !== "/") : links;
+// const navLinks = isHome ? links.filter((l) => l.href !== "/") : links;
+// const navLinks = links;
+const navLinks = links;
 ---
 
 <section

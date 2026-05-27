@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { parseMeta } from '../../lib/metatag';
+import { cfImg } from '../../lib/jsonapi-images';
+import WorkDetail from '../../components/WorkDetail.astro';
+import type { CollectionEntry } from 'astro:content';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const articles = await getCollection('article').catch(() => [] as CollectionEntry<'article'>[]);
+
+  return articles
+    .filter((e: CollectionEntry<'article'>) => !!e.data.alias)
+    .map((entry: CollectionEntry<'article'>) => {
+      const parts = entry.data.alias.split('/').filter(Boolean);
+      const slug = parts[parts.length - 1] ?? entry.id;
+
+      return {
+        params: { slug },
+        props: { entry },
+      };
+    });
+}
+
+interface Props { entry: CollectionEntry<'article'> }
+const { entry } = Astro.props;
+const { title, body, images, metatag } = entry.data;
+const meta = parseMeta(metatag);
+---
+
+<Layout
+  title={meta.title ?? title}
+  description={meta.description}
+  ogTitle={meta.ogTitle ?? meta.title ?? title}
+  ogDescription={meta.ogDescription ?? meta.description}
+  ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, height: 630, quality: 85 }) : undefined)}
+>
+  <WorkDetail title={title} body={body} images={images ?? []} />
+</Layout>

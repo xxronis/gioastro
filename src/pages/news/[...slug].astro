@@ -1,0 +1,47 @@
+---
+import { drupal } from '../../lib/drupal';
+import { cfImg, getImagesFromWork } from '../../lib/jsonapi-images';
+import Layout from '../../layouts/Layout.astro';
+import WorkDetail from '../../components/WorkDetail.astro';
+import { parseMeta } from '../../lib/metatag';
+import type { DrupalMetaTag } from '../../lib/metatag';
+
+export const prerender = false;
+
+type JsonApiDoc = { data: any; included?: any[] };
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/404');
+
+const alias = `/news/${slug}`;
+const route = await drupal.resolveAlias(alias);
+if (!route || route?.entity?.type !== 'node') {
+  return Astro.redirect('/404');
+}
+
+const nodeDoc = await drupal.api<JsonApiDoc>(
+  `/node/article/${route.entity.uuid}`,
+  {
+    include: 'field_media,field_media.field_media_image',
+    'fields[node--article]': 'title,body,field_media,metatag',
+  }
+);
+
+const node = nodeDoc.data;
+const title = node?.attributes?.title ?? 'News';
+const body = node?.attributes?.body?.processed ?? '';
+const images = getImagesFromWork(nodeDoc, drupal.baseUrl);
+const meta = parseMeta((node?.attributes?.metatag ?? []) as DrupalMetaTag[]);
+
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+---
+
+<Layout
+  title={meta.title ?? title}
+  description={meta.description}
+  ogTitle={meta.ogTitle ?? meta.title ?? title}
+  ogDescription={meta.ogDescription ?? meta.description}
+  ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, height: 630, quality: 85 }) : undefined)}
+>
+  <WorkDetail title={title} body={body} images={images} />
+</Layout>

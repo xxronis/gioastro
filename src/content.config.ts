@@ -224,6 +224,84 @@ export function drupalPagesLoader(options: {
   };
 }
 
+// ─── Article collection ───────────────────────────────────────────────────────
+
+export const articleSchema = z.object({
+  title: z.string(),
+  alias: z.string(),
+  body: z.string().optional(),
+  summary: z.string().optional(),
+  images: z.array(z.object({
+    src: z.string(),
+    alt: z.string(),
+    width: z.number().optional(),
+    height: z.number().optional(),
+  })).optional(),
+  created: z.string().optional(),
+  metatag: z.array(z.object({
+    tag: z.string(),
+    attributes: z.record(z.string(), z.string()),
+  })).optional().default([]),
+});
+
+export function drupalArticleLoader(options: {
+  baseUrl: string | undefined;
+  apiBase: string | undefined;
+}): Loader {
+  return {
+    name: 'drupal-article-loader',
+    async load({ store, parseData, logger }: LoaderContext) {
+      if (!options.baseUrl || !options.apiBase) {
+        logger.warn('DRUPAL_BASE_URL / DRUPAL_API_BASE not set — skipping article collection load.');
+        return;
+      }
+
+      logger.info('Fetching article entries from Drupal JSON:API...');
+      store.clear();
+
+      let response: { data: any[]; included?: any[] };
+      try {
+        const apiBase = asBaseUrl(options.apiBase);
+        const url = new URL('node/article', apiBase);
+        url.searchParams.set('sort', '-created');
+        url.searchParams.set('page[limit]', '100');
+        url.searchParams.set('include', 'field_media,field_media.field_media_image');
+        url.searchParams.set('fields[node--article]', 'title,path,body,created,field_media,metatag');
+
+        const res = await fetch(url.toString(), { headers: { Accept: 'application/vnd.api+json' } });
+        if (!res.ok) throw new Error(`JSON:API ${res.status}: ${url.pathname}`);
+        response = await res.json();
+      } catch (err) {
+        logger.warn(`Could not fetch articles from Drupal API: ${err}`);
+        return;
+      }
+
+      for (const node of response.data) {
+        const alias = node.attributes?.path?.alias ?? `/node/${node.id}`;
+        const images = getImagesFromEntity(node, response.included, options.baseUrl);
+
+        const entry = await parseData({
+          id: node.id,
+          data: {
+            title: node.attributes?.title ?? '',
+            alias,
+            body: node.attributes?.body?.processed ?? undefined,
+            summary: node.attributes?.body?.summary ?? undefined,
+            images: images.length ? images : undefined,
+            created: node.attributes?.created ?? undefined,
+            metatag: node.attributes?.metatag ?? [],
+          },
+        });
+
+        store.set({ id: node.id, data: entry });
+      }
+
+      logger.info(`Loaded ${response.data.length} article entries.`);
+    },
+    schema: articleSchema,
+  };
+}
+
 // ─── Collections export ───────────────────────────────────────────────────────
 
 export const collections = {
@@ -234,5 +312,9 @@ export const collections = {
   pages: defineCollection({
     loader: drupalPagesLoader({ baseUrl: DRUPAL_BASE_URL, apiBase: DRUPAL_API_BASE }),
     schema: pagesSchema,
+  }),
+  article: defineCollection({
+    loader: drupalArticleLoader({ baseUrl: DRUPAL_BASE_URL, apiBase: DRUPAL_API_BASE }),
+    schema: articleSchema,
   }),
 };
