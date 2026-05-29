@@ -109,7 +109,7 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
         {tags.length > 0 && (
           <div>
             <div class="text-xs tracking-[0.3em] uppercase text-gray-500 mb-2">Tags</div>
-            <div class="flex gap-1.5">
+            <div class="flex flex-wrap gap-1.5">
               {tags.map((tag) => (
                 <a
                   href={`/work/tag/${tag.slug}`}

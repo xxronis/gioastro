@@ -4,7 +4,7 @@
  */
 export const STATUS_LABELS: Record<string, string> = {
   available: 'original available',
-  sold: 'original sold',
+  sold: 'private collection',
   print_available: 'print available',
   commission_open: 'commission open', 
 };
