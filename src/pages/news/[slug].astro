@@ -37,5 +37,6 @@ const meta = parseMeta(metatag);
   ogDescription={meta.ogDescription ?? meta.description}
   ogImage={meta.ogImage ?? (images?.[0] ? cfImg(images[0].src, { width: 1200, height: 630, quality: 85 }) : undefined)}
 >
+  <h1 class="text-4xl font-semibold mb-8">News & Events</h1>
   <WorkDetail title={title} body={body} images={images ?? []} />
 </Layout>

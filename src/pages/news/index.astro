@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
-import { cfImg } from '../../lib/jsonapi-images';
+import ArticleList from '../../components/ArticleList.astro';
 
 export const prerender = true;
 
@@ -15,52 +15,15 @@ const news = [...allNews]
     if (!Number.isNaN(aDate) && !Number.isNaN(bDate)) return bDate - aDate;
     return a.data.title.localeCompare(b.data.title);
   });
-
-function toNewsSlug(alias: string, id: string) {
-  const parts = alias.split('/').filter(Boolean);
-  return parts[parts.length - 1] ?? id;
-}
 ---
 
 <Layout title="News" description="Latest news and updates by Giorgos Chronopoulos.">
     <h1 class="text-4xl font-semibold mb-8">News & Events</h1>
   <section class="max-w-5xl mx-auto">
-    
-
     {news.length === 0 && (
       <p class="text-neutral-600">No news published yet.</p>
     )}
 
-    <ul class="space-y-10 max-w-3xl mx-auto">
-      {news.map((entry) => {
-        const img = entry.data.images?.[0];
-        const slug = toNewsSlug(entry.data.alias, entry.id);
-        const href = `/news/${slug}`;
-
-        return (
-          <li class="max-w-2xl mx-auto">
-            <a href={href} class="group block w-full overflow-hidden shadow bg-white relative">
-              {img && (
-                <div class="w-full bg-[#f7f7f7]">
-                  <img
-                    src={cfImg(img.src, { width: 900, height: 560, quality: 85 })}
-                    alt={img.alt ?? ''}
-                    width="900"
-                    height="560"
-                    loading="lazy"
-                    class="block w-full h-[400px] md:h-[460px] object-cover"
-                  />
-                </div>
-              )}
-              <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-neutral-900/60 px-4 py-3
-                          opacity-100 md:group-hover:opacity-80 transition-opacity">
-                <h2 class="text-white text-xl leading-snug">{entry.data.title}</h2>
-              </div>
-            </a>
-            {/* <h2 class="text-2xl font-semibold mt-3 md:hidden">{entry.data.title}</h2> */}
-          </li>
-        );
-      })}
-    </ul>
+    {news.length > 0 && <ArticleList items={news} />}
   </section>
 </Layout>
