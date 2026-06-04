@@ -88,13 +88,24 @@ const isHome = pathname === "/";
     <meta property="og:title" content={resolvedOgTitle} />
     {resolvedOgDesc && <meta property="og:description" content={resolvedOgDesc} />}
     <meta property="og:image" content={resolvedOgImage} />
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Giorgos Chronopoulos",
+        "alternateName": "Giorgos Chronopoulos Fine Arts",
+        "url": "https://giorgoschronopoulos.com/"
+      })}
+    />
   </head>
   <body>
     <div class="flex flex-col min-h-screen">
         <Header/>
         <main class="flex-1" transition:animate={viewTransition}>
           {isHome && (
-            <div class="h-[calc(100vh)] md:h-[calc(100vh-10rem)] lg:h-[calc(100vh-26rem)] w-full bg-[url('/bg1.webp')] bg-cover bg-position-12% lg:bg-[position:0_20%] relative" style="touch-action: pan-y;">
+            <div class="h-[calc(100vh)] md:h-[calc(100vh-10rem)] lg:h-[calc(100vh-26rem)] w-full bg-[url('/bg0.webp')] bg-cover bg-[position:43%_0] lg:bg-[position:0_70%] relative" style="touch-action: pan-y;">
               <LoopVideo />
             </div>
           )}
