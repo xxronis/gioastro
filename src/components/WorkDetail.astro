@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { cfImg } from '../lib/jsonapi-images';
+import { decorateExternalLinks } from '../lib/html-links';
 
 interface Image {
   src: string;
@@ -17,6 +18,8 @@ interface Props {
 }
 
 const { title, body = '', images, statuses = [], tags = [], categories = [] } = Astro.props;
+const siteHostnames = [Astro.site?.hostname, Astro.url.hostname].filter(Boolean) as string[];
+const renderedBody = decorateExternalLinks(body, siteHostnames);
 ---
 
 <!-- <div class="py-8">
@@ -103,7 +106,7 @@ const { title, body = '', images, statuses = [], tags = [], categories = [] } = 
           )}
         </div>
         <article class="prose prose-lg max-w-none [&_p]:mb-4 [&_p]:leading-relaxed [&_p:last-child]:mb-0 [&_a]:text-neutral-600 [&_a:hover]:text-neutral-900 [&_a]:underline">
-          <div set:html={body} />
+          <div set:html={renderedBody} />
         </article>
         <div class="flex-1"></div>
         {tags.length > 0 && (
