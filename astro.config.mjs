@@ -8,6 +8,10 @@ const isCloudflare = process.env.ASTRO_ADAPTER === 'cloudflare';
 
 export default defineConfig({
   output: 'server',
+  trailingSlash: 'never',
+  build: {
+    format: 'file',
+  },
   adapter: isCloudflare
     ? cloudflare()
     : node({ mode: 'standalone' }),
